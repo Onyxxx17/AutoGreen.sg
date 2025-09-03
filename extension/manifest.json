@@ -1,0 +1,29 @@
+{
+  "name": "Hello Extensions of the world!",
+  "description": "Base Level Extension",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": "hello_extensions.png"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "scripts/config.js",
+        "scripts/utils.js",
+        "scripts/ui-manager.js",
+        "scripts/product-detector.js",
+        "scripts/content.js"
+      ],
+      "matches": [
+        "https://lazada.sg/*",
+        "https://www.lazada.sg/*",
+        "https://lazada.com.sg/*",
+        "https://www.lazada.com.sg/*",
+        "https://shopee.sg/*",
+        "https://www.shopee.sg/*"
+      ]
+    }
+  ]
+}
