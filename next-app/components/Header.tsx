@@ -9,7 +9,7 @@ const nav = [
     { href: "#features", label: "About Us" },
     { href: "#leaderboard", label: "Leaderboard" },
     { href: "#contact", label: "Contact Us" },
-    
+
 ];
 
 export default function Header() {

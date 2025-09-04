@@ -35,13 +35,15 @@ export default function Page() {
           </div>
 
           {/* RIGHT: Spline is absolutely positioned so aspect ratio changes don't move the text */}
-          <div className="absolute right-7 bottom-4 w-[900px] max-w-[80vw] aspect-[100/55]">
+          <div className="absolute right-3 bottom-2 w-[1500px] max-w-[200vw] aspect-[70/30]">
             <Script
               type="module"
               src="https://unpkg.com/@splinetool/viewer@1.10.53/build/spline-viewer.js"
               strategy="afterInteractive"
             />
             {/* @ts-expect-error – Spline custom element */}
+          
+
             <spline-viewer
               url="https://prod.spline.design/OhSzJIc7wDvMGHm7/scene.splinecode"
               className="absolute inset-0 h-full w-full"
