@@ -74,12 +74,12 @@ class AutoGreenFoodPandaExtractor {
       const subtitleElement = labelContainer?.querySelector('p.cl-neutral-secondary');
       const subtitleText = subtitleElement?.textContent?.trim() || "";
 
-      // Determine if eco-friendly option is active
-      // If subtitle mentions "no cutlery" and it's checked, then eco-friendly is ON
-      // If subtitle mentions "add cutlery" and it's checked, then eco-friendly is OFF
-      const isEcoFriendly = subtitleText.toLowerCase().includes('no cutlery') ? isChecked : !isChecked;
+      // Determine if eco-friendly option is active based on the subtitle text
+      // "No cutlery provided. Thanks for reducing waste!" = eco-friendly
+      // "If available, your order will come with cutlery" = not eco-friendly
+      const isEcoFriendly = subtitleText.toLowerCase().includes('no cutlery provided') || 
+                           subtitleText.toLowerCase().includes('thanks for reducing waste');
 
-      this.logger?.log(`Cutlery toggle status: ${isChecked ? 'ON' : 'OFF'}, Eco-friendly: ${isEcoFriendly ? 'YES' : 'NO'}`);
 
       return {
         found: true,
