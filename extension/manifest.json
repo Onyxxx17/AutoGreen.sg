@@ -1,20 +1,43 @@
 {
-  "name": "Hello Extensions of the world!",
-  "description": "Base Level Extension",
-  "version": "1.0",
+  "name": "AutoGreen Product Scanner",
+  "description": "Intelligent product scanner for Lazada and Shopee that extracts and analyzes product information with advanced deep scanning capabilities",
+  "version": "1.0.0",
   "manifest_version": 3,
+  "permissions": ["activeTab", "storage", "downloads"],
+  "host_permissions": [
+    "https://lazada.sg/*",
+    "https://www.lazada.sg/*",
+    "https://lazada.com.sg/*",
+    "https://www.lazada.com.sg/*",
+    "https://shopee.sg/*",
+    "https://www.shopee.sg/*"
+  ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_icon": "hello_extensions.png"
+    "default_icon": "hello_extensions.png",
+    "default_title": "AutoGreen Product Scanner"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "js": [
-        "scripts/config.js",
-        "scripts/utils.js",
-        "scripts/ui-manager.js",
-        "scripts/product-detector.js",
-        "scripts/content.js"
+        "scripts/core/config.js",
+        "scripts/utils/logger.js",
+        "scripts/utils/dom-utils.js",
+        "scripts/extractors/product-extractor.js",
+        "scripts/storage/storage-utils.js",
+        "scripts/utils/performance-utils.js",
+        "scripts/utils/utils.js",
+        "scripts/ui/ui-manager.js",
+        "scripts/storage/data-storage.js",
+        "scripts/extractors/content-extractor.js",
+        "scripts/extractors/iframe-extractor.js",
+        "scripts/scanner/deep-scanner-core.js",
+        "scripts/scanner/deep-scanner.js",
+        "scripts/scanner/product-detector.js",
+        "scripts/core/content.js"
       ],
       "matches": [
         "https://lazada.sg/*",
@@ -23,7 +46,13 @@
         "https://www.lazada.com.sg/*",
         "https://shopee.sg/*",
         "https://www.shopee.sg/*"
-      ]
+      ],
+      "run_at": "document_end"
     }
-  ]
+  ],
+  "icons": {
+    "16": "hello_extensions.png",
+    "48": "hello_extensions.png",
+    "128": "hello_extensions.png"
+  }
 }

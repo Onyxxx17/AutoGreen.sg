@@ -1,14 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AutoGreen.sg</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AutoGreen.sg</title>
 
-  <link rel="stylesheet" href="popup.css">
-</head>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>🛍️ AutoGreen Extension</h1>
 
-<body>
+    <div class="section">
+      <h3>Product Detection</h3>
+      <div id="basic-stats" class="stats">Loading...</div>
+    </div>
+
+    <div class="section">
+      <h3>Deep Scan Settings</h3>
+      <div class="toggle-container">
+        <span>Enable Deep Scan</span>
+        <label class="switch">
+          <input type="checkbox" id="deepScanToggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="deepScanStatus" class="status-text">
+        Deep scan extracts detailed product information including ingredients
+        and specifications.
+      </div>
+      <div id="deep-scan-stats" class="stats">Loading...</div>
+    </div>
+
+    <div class="section">
+      <h3>Actions</h3>
+      <button id="viewData" class="button">View Data</button>
+      <button id="clearData" class="button danger">Clear Data</button>
+      <button id="refreshStats" class="button">Refresh</button>
+    </div>
+
+    <body>
   <!-- Header -->
   <header class="header">
     <div class="header-bg"></div>
@@ -149,6 +179,7 @@
   <!-- Notification Container -->
   <div id="notifications" class="notification-container"></div>
 
-  <script src="popup.js"></script>
-</body>
+
+    <script src="popup.js"></script>
+  </body>
 </html>

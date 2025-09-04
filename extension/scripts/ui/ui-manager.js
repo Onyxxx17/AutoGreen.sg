@@ -56,6 +56,36 @@ class UIManager {
   }
 
   /**
+   * Show deep scan progress indicator
+   */
+  showDeepScanProgress(queueLength, activeScans) {
+    try {
+      let progressIndicator = document.getElementById(
+        "autogreen-deep-progress"
+      );
+
+      if (queueLength === 0 && activeScans === 0) {
+        // Remove indicator if no activity
+        if (progressIndicator) {
+          progressIndicator.remove();
+          this.indicators.delete("deep-progress");
+        }
+        return;
+      }
+
+      if (!progressIndicator) {
+        progressIndicator = this.createDeepScanProgressElement();
+        document.body.appendChild(progressIndicator);
+        this.indicators.set("deep-progress", progressIndicator);
+      }
+
+      progressIndicator.textContent = `🔍 Deep Scan: ${activeScans} active, ${queueLength} queued`;
+    } catch (error) {
+      this.logger.error("Failed to update deep scan progress:", error);
+    }
+  }
+
+  /**
    * Create indicator element with consistent styling
    */
   createIndicatorElement(message, type) {
@@ -107,6 +137,31 @@ class UIManager {
     `;
 
     return counter;
+  }
+
+  /**
+   * Create deep scan progress element
+   */
+  createDeepScanProgressElement() {
+    const progress = document.createElement("div");
+    progress.id = "autogreen-deep-progress";
+
+    progress.style.cssText = `
+      position: fixed !important;
+      bottom: 70px !important;
+      right: 20px !important;
+      background: ${this.config.UI.COLORS.DEEP_SCAN} !important;
+      color: white !important;
+      padding: 8px 12px !important;
+      z-index: ${this.config.UI.Z_INDEX} !important;
+      font-family: Arial, sans-serif !important;
+      font-size: 12px !important;
+      font-weight: bold !important;
+      border-radius: 15px !important;
+      border: 2px solid white !important;
+    `;
+
+    return progress;
   }
 
   /**
