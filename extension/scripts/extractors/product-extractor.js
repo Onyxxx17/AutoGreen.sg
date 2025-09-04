@@ -1,8 +1,8 @@
 /**
  * AutoGreen.sg Extension - Product Extractor Module
- * 
+ *
  * Product information extraction utilities
- * 
+ *
  * @author AutoGreen Team
  * @version 1.0.0
  */
@@ -25,7 +25,7 @@ const AutoGreenProductExtractor = {
     if (str.length === 0) return hash;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);
@@ -41,33 +41,57 @@ const AutoGreenProductExtractor = {
       const currentUrl = window.location.href;
       const domUtils = window.AutoGreenDOMUtils;
       const logger = window.AutoGreenLogger;
-      
+
       if (!domUtils) {
-        console.error('DOM utilities not available');
+        console.error("DOM utilities not available");
         return null;
       }
 
-      const position = domUtils.getElementPosition(productElement);
+      // Handle case where productElement is itself a link container
+      let actualElement = productElement;
+      if (productElement.tagName === "A") {
+        // If it's a link, we might need to use it as both container and link
+        // But for position calculation, use the link element
+        actualElement = productElement;
+      }
+
+      const position = domUtils.getElementPosition(actualElement);
       const elementTop = position.top;
       const siteConfig = domUtils.getCurrentSiteConfig(currentUrl);
 
       if (!siteConfig) {
         if (logger) {
-          logger.warn('No site configuration found for current URL');
+          logger.warn("No site configuration found for current URL");
         }
         return null;
       }
 
       // Extract product link
       const productLink = this.extractProductLink(productElement, siteConfig);
-      
-      // Extract product name
-      const productName = this.extractProductName(productElement, siteConfig, productLink);
 
-      // Validate product name
-      if (!this.isValidProductName(productName)) {
+      // Extract product name
+      const productName = this.extractProductName(
+        productElement,
+        siteConfig,
+        productLink
+      );
+
+      // Enhanced validation - also check if we have a valid link
+      if (!this.isValidProductName(productName) || !productLink) {
         if (logger) {
-          logger.debug(`Invalid product name: "${productName}"`);
+          logger.debug(
+            `Invalid product: name="${productName}", link="${productLink}"`
+          );
+        }
+        return null;
+      }
+
+      // Additional validation for Lazada products
+      if (
+        !this.validateLazadaProduct(productElement, productName, productLink)
+      ) {
+        if (logger) {
+          logger.debug(`Failed Lazada validation: name="${productName}"`);
         }
         return null;
       }
@@ -77,113 +101,311 @@ const AutoGreenProductExtractor = {
         name: productName,
         link: productLink,
         position: elementTop,
-        element: productElement,
+        element: actualElement,
         extractedAt: new Date().toISOString(),
         sourceUrl: currentUrl,
         siteType: domUtils.getSiteType(currentUrl),
       };
 
       if (logger) {
-        logger.debug('Extracted product info:', productInfo);
+        logger.debug("Extracted product info:", productInfo);
       }
       return productInfo;
-
     } catch (error) {
       if (window.AutoGreenLogger) {
-        window.AutoGreenLogger.error('Error extracting product info:', error);
+        window.AutoGreenLogger.error("Error extracting product info:", error);
       }
       return null;
     }
   },
 
   /**
-   * Extract product link using site-specific selectors
+   * Validate Lazada-specific product requirements
+   */
+  validateLazadaProduct(productElement, productName, productLink) {
+    // Must have a Lazada product link
+    if (!productLink || !productLink.includes("lazada.sg")) {
+      return false;
+    }
+
+    // Must be a product page link
+    if (!productLink.includes("/products/") && !productLink.includes("pdp-i")) {
+      return false;
+    }
+
+    // Should have some price indicator (optional but increases confidence)
+    const hasPriceIndicator = productElement.querySelector(
+      '.price, [class*="price"], [data-price-type], [style*="color: rgb(254, 73, 96)"], [style*="color: rgb(255, 0, 58)"]'
+    );
+
+    // Should have an image (optional but increases confidence)
+    const hasImage = productElement.querySelector(
+      'img[src*="lazcdn.com"], img[src*="slatic.net"], .ant-image-img, .item-card-img'
+    );
+
+    // At least one supporting element should be present for confidence
+    return hasPriceIndicator || hasImage;
+  },
+
+  /**
+   * Extract product link using site-specific selectors with enhanced Lazada support
    */
   extractProductLink(productElement, siteConfig) {
-    // Try primary selector
+    // Method 1: If the element itself is a link
+    if (productElement.tagName === "A" && productElement.href) {
+      return productElement.href;
+    }
+
+    // Method 2: Try primary selector
     let anchor = productElement.querySelector(siteConfig.PRODUCT_LINK);
 
-    // Try fallback selector if available
+    // Method 3: Try fallback selector if available
     if (!anchor && siteConfig.PRODUCT_LINK_FALLBACK) {
       anchor = productElement.querySelector(siteConfig.PRODUCT_LINK_FALLBACK);
     }
 
-    // Last resort - any anchor
+    // Method 4: Enhanced Lazada-specific link detection
     if (!anchor) {
-      anchor = productElement.querySelector('a[href]') || 
-               productElement.closest('a[href]');
+      const lazadaSelectors = [
+        'a[href*="/products/"]',
+        "a[data-item-id]",
+        'a[data-tracker*="product"]',
+        'a[href*="lazada.sg"]',
+        "a.trackedLink",
+        "a[data-spm-anchor-id]",
+      ];
+
+      for (const selector of lazadaSelectors) {
+        anchor = productElement.querySelector(selector);
+        if (anchor && anchor.href) break;
+      }
+    }
+
+    // Method 5: Last resort - any anchor with href
+    if (!anchor) {
+      anchor =
+        productElement.querySelector("a[href]") ||
+        productElement.closest("a[href]");
     }
 
     return anchor?.href || null;
   },
 
   /**
-   * Extract product name using various strategies
+   * Extract product name using various strategies with enhanced Lazada support
    */
   extractProductName(productElement, siteConfig, productLink) {
-    let productName = '';
+    let productName = "";
 
-    // Strategy 1: Title attribute from link
+    // Strategy 1: Title attribute from link (highest priority)
     if (productLink) {
-      const linkElement = productElement.querySelector('a[title]');
+      const linkElement =
+        productElement.querySelector("a[title]") ||
+        productElement.closest("a[title]");
       if (linkElement?.title) {
         productName = linkElement.title.trim();
+        if (this.isValidProductName(productName)) {
+          return productName;
+        }
       }
     }
 
-    // Strategy 2: Site-specific selectors
+    // Strategy 2: Lazada-specific title selectors
+    if (!productName && siteConfig.PRODUCT_TITLE_SELECTORS) {
+      for (const selector of siteConfig.PRODUCT_TITLE_SELECTORS) {
+        try {
+          const titleElement = productElement.querySelector(selector);
+          if (titleElement) {
+            // Handle different title extraction methods
+            let extractedTitle = "";
+
+            if (titleElement.hasAttribute("title")) {
+              extractedTitle = titleElement.getAttribute("title");
+            } else if (titleElement.textContent) {
+              extractedTitle = titleElement.textContent.trim();
+            }
+
+            if (extractedTitle && this.isValidProductName(extractedTitle)) {
+              productName = extractedTitle;
+              break;
+            }
+          }
+        } catch (error) {
+          // Continue to next selector if current one fails
+          continue;
+        }
+      }
+    }
+
+    // Strategy 3: Site-specific title selectors (fallback)
     if (!productName && siteConfig.HOME_PAGE_TITLE) {
-      const titleElement = productElement.querySelector(siteConfig.HOME_PAGE_TITLE);
-      if (titleElement) {
-        productName = titleElement.textContent.trim();
+      const titleElements = productElement.querySelectorAll(
+        siteConfig.HOME_PAGE_TITLE
+      );
+      for (const titleElement of titleElements) {
+        const text = titleElement.textContent.trim();
+        if (text && this.isValidProductName(text)) {
+          productName = text;
+          break;
+        }
       }
     }
 
-    // Strategy 3: Generic text content extraction
+    // Strategy 4: Enhanced text content extraction for complex layouts
     if (!productName) {
-      // Look for the longest meaningful text content
-      const textElements = productElement.querySelectorAll('a, span, div, p');
-      let longestText = '';
-      
-      textElements.forEach(element => {
+      productName = this.extractProductNameFromComplexLayout(productElement);
+    }
+
+    // Strategy 5: Generic fallback - longest meaningful text
+    if (!productName) {
+      const textElements = productElement.querySelectorAll(
+        "a, span, div, p, h1, h2, h3, h4, h5, h6"
+      );
+      let longestText = "";
+
+      textElements.forEach((element) => {
         const text = element.textContent.trim();
-        if (text.length > longestText.length && this.looksLikeProductName(text)) {
+        if (
+          text.length > longestText.length &&
+          text.length >= 10 &&
+          this.looksLikeProductName(text)
+        ) {
           longestText = text;
         }
       });
-      
+
       productName = longestText;
     }
 
-    // Strategy 4: Fallback to element text content
-    if (!productName) {
-      productName = productElement.textContent.trim();
+    return productName.trim();
+  },
+  extractProductNameFromComplexLayout(productElement) {
+    // Check for specific Lazada patterns
+    const patterns = [
+      // RedMart style titles
+      "span[title]",
+
+      // Rax text components
+      '.rax-text-v2:not([style*="font-size: 12px"]):not([style*="font-size: 16px"])',
+
+      // Item card titles
+      ".item-card-title span",
+
+      // Product description spans with line clamps (typically product names)
+      'span[style*="-webkit-line-clamp: 2"]',
+      'span[numberoflines="2"]',
+
+      // Text elements with specific heights (common for product titles)
+      'span[style*="height: 40px"]',
+      'div[style*="height: 40px"] span',
+
+      // Look for the largest text element that's not a price
+      'span:not([class*="price"]):not([style*="color: rgb(254, 73, 96)"]):not([style*="color: rgb(255, 0, 58)"])',
+    ];
+
+    for (const pattern of patterns) {
+      try {
+        const elements = productElement.querySelectorAll(pattern);
+        for (const element of elements) {
+          const text =
+            element.textContent?.trim() ||
+            element.getAttribute("title")?.trim();
+
+          if (
+            text &&
+            text.length >= 10 &&
+            !this.looksLikePrice(text) &&
+            !this.looksLikeRating(text) &&
+            this.looksLikeProductName(text)
+          ) {
+            return text;
+          }
+        }
+      } catch (error) {
+        continue;
+      }
     }
 
-    return productName;
+    return "";
   },
 
   /**
-   * Check if text looks like a product name
+   * Check if text looks like a price
+   */
+  looksLikePrice(text) {
+    return /^\$?\d+\.?\d*$|^\$?\?\.\d+/.test(text.trim());
+  },
+
+  /**
+   * Check if text looks like a rating
+   */
+  looksLikeRating(text) {
+    return (
+      /^\d+\.?\d*\s*\(\d+\.?\d*k?\)$|^\d+\.?\d*$/.test(text.trim()) &&
+      text.length < 10
+    );
+  },
+
+  /**
+   * Check if text looks like a product name with enhanced validation
    */
   looksLikeProductName(text) {
     if (!text || text.length < 5) return false;
-    
-    // Should contain letters
-    if (!/[a-zA-Z]/.test(text)) return false;
-    
-    // Should not be just numbers
-    if (/^[\d\s\-.,]+$/.test(text)) return false;
-    
-    // Should not be common UI text
-    const commonUIText = [
-      'add to cart', 'buy now', 'view details', 'more info', 'see more',
-      'quick view', 'add to wishlist', 'compare', 'share', 'sold',
-      'rating', 'reviews', 'price', 'discount', 'offer', 'sale'
+
+    // Enhanced skip patterns for better filtering
+    const skipPatterns = [
+      // Prices
+      /^\$?\d+\.?\d*$|^\$?\?\.\d+/,
+
+      // Ratings and reviews
+      /^\d+\.?\d*\s*\(\d+\.?\d*k?\)$/,
+      /^\d+\.?\d*$/,
+
+      // Common UI elements
+      /^(add to cart|buy now|shop now|view all|see more|load more)$/i,
+      /^(free shipping|fast delivery|sold)$/i,
+
+      // Very short text
+      /^.{1,4}$/,
+
+      // Only numbers or symbols
+      /^[\d\s\-\$\.\,\(\)]+$/,
+
+      // Promotional text
+      /^(sale|hot|new|trending|\d+% off)$/i,
+
+      // Common Lazada elements
+      /^(\d+ sold|\d+k reviews?|lazada|shopee)$/i,
     ];
-    const lowerText = text.toLowerCase();
-    
-    return !commonUIText.some(ui => lowerText.includes(ui));
+
+    // Check against skip patterns
+    for (const pattern of skipPatterns) {
+      if (pattern.test(text.trim())) {
+        return false;
+      }
+    }
+
+    // Must have some alphabetic characters
+    if (!/[a-zA-Z]{3,}/.test(text)) {
+      return false;
+    }
+
+    // Should look like product description
+    const productIndicators = [
+      /\b(pack|set|piece|pcs|ml|kg|gram|liter|size|color|model)\b/i,
+      /\b(for|with|and|the|of|in)\b/i,
+      /[a-zA-Z]{10,}/, // Long words typical of product names
+    ];
+
+    let hasIndicator = false;
+    for (const pattern of productIndicators) {
+      if (pattern.test(text)) {
+        hasIndicator = true;
+        break;
+      }
+    }
+
+    return hasIndicator && text.length <= 200; // Reasonable max length
   },
 
   /**
@@ -225,32 +447,40 @@ const AutoGreenProductExtractor = {
 
     try {
       // Extract price if available
-      const priceElement = productElement.querySelector(siteConfig.PRICE_SELECTOR || '.price, [class*="price"]');
+      const priceElement = productElement.querySelector(
+        siteConfig.PRICE_SELECTOR || '.price, [class*="price"]'
+      );
       if (priceElement) {
         metadata.price = priceElement.textContent.trim();
       }
 
       // Extract rating if available
-      const ratingElement = productElement.querySelector(siteConfig.RATING_SELECTOR || '[class*="rating"], [class*="star"]');
+      const ratingElement = productElement.querySelector(
+        siteConfig.RATING_SELECTOR || '[class*="rating"], [class*="star"]'
+      );
       if (ratingElement) {
         metadata.rating = ratingElement.textContent.trim();
       }
 
       // Extract image if available
-      const imageElement = productElement.querySelector('img[src]');
+      const imageElement = productElement.querySelector("img[src]");
       if (imageElement) {
         metadata.image = imageElement.src;
       }
 
       // Extract brand if available
-      const brandElement = productElement.querySelector(siteConfig.BRAND_SELECTOR || '[class*="brand"]');
+      const brandElement = productElement.querySelector(
+        siteConfig.BRAND_SELECTOR || '[class*="brand"]'
+      );
       if (brandElement) {
         metadata.brand = brandElement.textContent.trim();
       }
-
     } catch (error) {
       if (window.AutoGreenLogger) {
-        window.AutoGreenLogger.error('Error extracting product metadata:', error);
+        window.AutoGreenLogger.error(
+          "Error extracting product metadata:",
+          error
+        );
       }
     }
 
@@ -280,7 +510,9 @@ const AutoGreenProductExtractor = {
     });
 
     if (logger) {
-      logger.info(`Extracted ${products.length} products from ${elements.length} elements`);
+      logger.info(
+        `Extracted ${products.length} products from ${elements.length} elements`
+      );
     }
 
     return products;
@@ -288,6 +520,6 @@ const AutoGreenProductExtractor = {
 };
 
 // Make Product Extractor available globally
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   window.AutoGreenProductExtractor = AutoGreenProductExtractor;
 }
