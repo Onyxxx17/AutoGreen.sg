@@ -31,7 +31,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   // Only process when the page is completely loaded
   if (changeInfo.status === "complete" && tab.url) {
     const isValidSite =
-      tab.url.includes("lazada.") || tab.url.includes("shopee.");
+      tab.url.includes("lazada.") || 
+      tab.url.includes("foodpanda.");
 
     if (isValidSite) {
       console.log(

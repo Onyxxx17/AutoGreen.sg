@@ -37,19 +37,158 @@ function initializeAutoGreen() {
   window.AutoGreenLogger.log("Starting AutoGreen Extension...");
 
   try {
-    // Test deep scanner class first
-    if (typeof window.AutoGreenDeepScanner === 'function') {
-      window.AutoGreenLogger.log("Deep scanner class is available");
+    // Check what type of site this is
+    const currentUrl = window.location.href;
+    const isFoodPanda = window.AutoGreenConfig.URL_PATTERNS.FOODPANDA.DOMAIN.test(currentUrl);
+    
+    if (isFoodPanda) {
+      window.AutoGreenLogger.log("FoodPanda site detected, initializing eco-friendly features...");
+      initializeFoodPandaFeatures();
     } else {
-      window.AutoGreenLogger.error("Deep scanner class is not a function:", typeof window.AutoGreenDeepScanner);
-    }
+      window.AutoGreenLogger.log("E-commerce site detected, initializing product detection...");
+      
+      // Test deep scanner class first
+      if (typeof window.AutoGreenDeepScanner === 'function') {
+        window.AutoGreenLogger.log("Deep scanner class is available");
+      } else {
+        window.AutoGreenLogger.error("Deep scanner class is not a function:", typeof window.AutoGreenDeepScanner);
+      }
 
-    window.autoGreenDetector = new window.AutoGreenProductDetector();
+      window.autoGreenDetector = new window.AutoGreenProductDetector();
+    }
+    
     window.AutoGreenLogger.log("AutoGreen Extension initialized successfully");
   } catch (error) {
     window.AutoGreenLogger.error("Failed to initialize AutoGreen:", error);
     window.AutoGreenLogger.error("Error details:", error.stack);
   }
+}
+
+/**
+ * Initialize FoodPanda-specific features
+ */
+function initializeFoodPandaFeatures() {
+  if (!window.AutoGreenFoodPandaExtractor) {
+    window.AutoGreenLogger.error("FoodPanda extractor not available");
+    return;
+  }
+
+  window.AutoGreenLogger.log("Initializing FoodPanda eco-friendly features...");
+
+  // Check for eco-friendly options on any FoodPanda page (not just cart)
+  window.AutoGreenLogger.log("Checking for eco-friendly options on any FoodPanda page...");
+  
+  // Wait a bit for the page to fully load
+  setTimeout(() => {
+    checkAndDisplayEcoStatus();
+    setupFoodPandaMonitoring();
+  }, 2000);
+
+  // Also monitor for any page changes that might load cutlery options
+  monitorForPageChanges();
+}
+
+/**
+ * Check and display eco-friendly status
+ */
+function checkAndDisplayEcoStatus() {
+  try {
+    const ecoStatus = window.AutoGreenFoodPandaExtractor.getEcoFriendlyStatus();
+    window.AutoGreenLogger.log("Eco-friendly status:", ecoStatus);
+
+    if (ecoStatus.cutlery && ecoStatus.cutlery.found) {
+      // Show status in UI
+      if (window.AutoGreenUIManager) {
+        const ui = new window.AutoGreenUIManager();
+        ui.showIndicator(ecoStatus.cutlery.message, 
+                        ecoStatus.cutlery.ecoFriendly ? 'success' : 'warning', 
+                        4000);
+      }
+    }
+
+    // Store the status for popup access
+    window.autoGreenFoodPandaStatus = ecoStatus;
+    
+  } catch (error) {
+    window.AutoGreenLogger.error("Error checking eco status:", error);
+  }
+}
+
+/**
+ * Set up monitoring for FoodPanda toggle changes
+ */
+function setupFoodPandaMonitoring() {
+  try {
+    // Monitor cutlery toggle changes
+    const cleanup = window.AutoGreenFoodPandaExtractor.monitorCutleryToggle((status) => {
+      window.AutoGreenLogger.log("Cutlery toggle changed:", status);
+      
+      // Update stored status
+      if (window.autoGreenFoodPandaStatus) {
+        window.autoGreenFoodPandaStatus.cutlery = status;
+      }
+
+      // Show feedback
+      if (window.AutoGreenUIManager) {
+        const ui = new window.AutoGreenUIManager();
+        ui.showIndicator(status.message, 
+                        status.ecoFriendly ? 'success' : 'info', 
+                        3000);
+      }
+    });
+
+    // Store cleanup function
+    window.autoGreenFoodPandaCleanup = cleanup;
+    
+  } catch (error) {
+    window.AutoGreenLogger.error("Error setting up FoodPanda monitoring:", error);
+  }
+}
+
+/**
+ * Monitor for page changes that might load cutlery options
+ */
+function monitorForPageChanges() {
+  // Use MutationObserver to watch for DOM changes and URL changes (SPA navigation)
+  let lastUrl = window.location.href;
+  
+  const observer = new MutationObserver(() => {
+    const currentUrl = window.location.href;
+    if (currentUrl !== lastUrl) {
+      lastUrl = currentUrl;
+      window.AutoGreenLogger.log("Page changed, checking for eco-friendly options...");
+      
+      // Wait for new content to load
+      setTimeout(() => {
+        checkAndDisplayEcoStatus();
+        setupFoodPandaMonitoring();
+      }, 2000);
+    }
+    
+    // Also check for new cutlery toggle elements that might have been added
+    if (!window.autoGreenFoodPandaCleanup) {
+      // Only set up monitoring if not already monitoring
+      const cutleryToggle = document.querySelector('#cutlery-switch, [data-testid="cart-cutlery-component"]');
+      if (cutleryToggle) {
+        window.AutoGreenLogger.log("Cutlery toggle detected in DOM changes, setting up monitoring...");
+        setupFoodPandaMonitoring();
+      }
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  // Also listen for popstate events (browser back/forward)
+  window.addEventListener('popstate', () => {
+    setTimeout(() => {
+      window.AutoGreenLogger.log("Navigation detected, checking for eco-friendly options...");
+      checkAndDisplayEcoStatus();
+      setupFoodPandaMonitoring();
+    }, 1000);
+  });
 }
 
 /**
@@ -188,6 +327,69 @@ function setupDebugUtilities() {
         }
         
         return results;
+      },
+
+      // FoodPanda debug methods
+      getFoodPandaStatus: () => {
+        try {
+          if (window.AutoGreenFoodPandaExtractor) {
+            return window.AutoGreenFoodPandaExtractor.getEcoFriendlyStatus();
+          }
+          return { error: "FoodPanda extractor not available" };
+        } catch (error) {
+          console.error("Debug getFoodPandaStatus error:", error);
+          return { error: error.message };
+        }
+      },
+      
+      checkCutleryToggle: () => {
+        try {
+          if (window.AutoGreenFoodPandaExtractor) {
+            return window.AutoGreenFoodPandaExtractor.checkCutleryStatus();
+          }
+          return { error: "FoodPanda extractor not available" };
+        } catch (error) {
+          console.error("Debug checkCutleryToggle error:", error);
+          return { error: error.message };
+        }
+      },
+
+      isFoodPandaSite: () => {
+        try {
+          if (window.AutoGreenFoodPandaExtractor) {
+            return {
+              isFoodPanda: window.AutoGreenFoodPandaExtractor.isFoodPandaPage(),
+              isCartPage: window.AutoGreenFoodPandaExtractor.isCartOrCheckoutPage(),
+              currentUrl: window.location.href
+            };
+          }
+          return { error: "FoodPanda extractor not available" };
+        } catch (error) {
+          console.error("Debug isFoodPandaSite error:", error);
+          return { error: error.message };
+        }
+      },
+
+      testFoodPandaMonitoring: () => {
+        try {
+          if (window.AutoGreenFoodPandaExtractor) {
+            const cleanup = window.AutoGreenFoodPandaExtractor.monitorCutleryToggle((status) => {
+              console.log("Test monitoring - cutlery changed:", status);
+            });
+            
+            // Clean up after 10 seconds
+            setTimeout(() => {
+              if (cleanup) cleanup();
+              console.log("Test monitoring stopped");
+            }, 10000);
+            
+            return { success: true, message: "Monitoring started for 10 seconds" };
+          }
+          return { error: "FoodPanda extractor not available" };
+        } catch (error) {
+          console.error("Debug testFoodPandaMonitoring error:", error);
+          return { error: error.message };
+        }
       }
     };
 
@@ -266,6 +468,34 @@ function setupMessageListener() {
           } catch (clearError) {
             console.error("[AutoGreen] Clear data error:", clearError);
             sendResponse({ success: false, error: clearError.message });
+          }
+          break;
+
+        case "getFoodPandaStatus":
+          try {
+            if (window.AutoGreenFoodPandaExtractor) {
+              const status = window.AutoGreenFoodPandaExtractor.getEcoFriendlyStatus();
+              sendResponse({ status, success: true });
+            } else {
+              sendResponse({ success: false, error: "FoodPanda extractor not available" });
+            }
+          } catch (foodPandaError) {
+            console.error("[AutoGreen] FoodPanda status error:", foodPandaError);
+            sendResponse({ success: false, error: foodPandaError.message });
+          }
+          break;
+
+        case "checkCutleryToggle":
+          try {
+            if (window.AutoGreenFoodPandaExtractor) {
+              const cutleryStatus = window.AutoGreenFoodPandaExtractor.checkCutleryStatus();
+              sendResponse({ cutleryStatus, success: true });
+            } else {
+              sendResponse({ success: false, error: "FoodPanda extractor not available" });
+            }
+          } catch (cutleryError) {
+            console.error("[AutoGreen] Cutlery toggle error:", cutleryError);
+            sendResponse({ success: false, error: cutleryError.message });
           }
           break;
 

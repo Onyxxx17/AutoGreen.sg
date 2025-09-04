@@ -137,6 +137,32 @@ const AutoGreenConfig = {
       PRODUCT_TITLE: ".shopee-search-item-result__item-name",
     },
 
+    // FoodPanda selectors
+    FOODPANDA: {
+      // Cart and checkout page selectors
+      CART_CONTAINER: "[data-testid='cart-page'], .cart-container",
+      CHECKOUT_CONTAINER: "[data-testid='checkout-page'], .checkout-container",
+      
+      // Cutlery toggle selectors
+      CUTLERY_TOGGLE: {
+        CONTAINER: ".cutlery-toggle-wrapper",
+        CHECKBOX: "#cutlery-switch, [data-testid='cart-cutlery-component']",
+        LABEL: ".cutlery-text",
+        SWITCH_CONTAINER: ".bds-c-switch",
+      },
+
+      // Other eco-friendly options
+      ECO_OPTIONS: {
+        // Add more eco-friendly toggles as needed
+        PLASTIC_BAG: "[data-testid='plastic-bag-toggle']",
+        PAPER_BAG: "[data-testid='paper-bag-toggle']",
+      },
+
+      // General food delivery selectors
+      RESTAURANT_ITEMS: ".dish-card, .menu-item",
+      CART_ITEMS: ".cart-item, [data-testid='cart-item']",
+    },
+
     // Common selectors (fallback)
     COMMON: {
       PRODUCT_CONTAINER: ".RfADt, .card-jfy-item-desc",
@@ -155,6 +181,11 @@ const AutoGreenConfig = {
     SHOPEE: {
       DOMAIN: /shopee\.sg/,
       PRODUCT_PAGE: /\/.*-i\./,
+    },
+    FOODPANDA: {
+      DOMAIN: /foodpanda\.sg|foodpanda\.com\.sg/,
+      CART_PAGE: /\/checkout|\/cart/,
+      RESTAURANT_PAGE: /\/restaurant\//,
     },
   },
 
@@ -241,6 +272,8 @@ AutoGreenConfig.getSelectorForSite = function (url) {
     return this.SELECTORS.LAZADA;
   } else if (url.includes("shopee")) {
     return this.SELECTORS.SHOPEE;
+  } else if (url.includes("foodpanda")) {
+    return this.SELECTORS.FOODPANDA;
   }
   return this.SELECTORS.COMMON;
 };
@@ -248,7 +281,8 @@ AutoGreenConfig.getSelectorForSite = function (url) {
 AutoGreenConfig.isValidEcommerceSite = function (url) {
   return (
     this.URL_PATTERNS.LAZADA.DOMAIN.test(url) ||
-    this.URL_PATTERNS.SHOPEE.DOMAIN.test(url)
+    this.URL_PATTERNS.SHOPEE.DOMAIN.test(url) ||
+    this.URL_PATTERNS.FOODPANDA.DOMAIN.test(url)
   );
 };
 

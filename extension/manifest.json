@@ -1,6 +1,6 @@
 {
   "name": "AutoGreen Product Scanner",
-  "description": "Intelligent product scanner for Lazada and Shopee that extracts and analyzes product information with advanced deep scanning capabilities",
+  "description": "Intelligent product scanner for Lazada, and FoodPanda that extracts and analyzes product information with advanced deep scanning and eco-friendly option detection",
   "version": "1.0.0",
   "manifest_version": 3,
   "permissions": ["activeTab", "storage", "downloads"],
@@ -9,8 +9,10 @@
     "https://www.lazada.sg/*",
     "https://lazada.com.sg/*",
     "https://www.lazada.com.sg/*",
-    "https://shopee.sg/*",
-    "https://www.shopee.sg/*"
+    "https://foodpanda.sg/*",
+    "https://www.foodpanda.sg/*",
+    "https://foodpanda.com.sg/*",
+    "https://www.foodpanda.com.sg/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -34,6 +36,7 @@
         "scripts/storage/data-storage.js",
         "scripts/extractors/content-extractor.js",
         "scripts/extractors/iframe-extractor.js",
+        "scripts/extractors/foodpanda-extractor.js",
         "scripts/scanner/deep-scanner-core.js",
         "scripts/scanner/deep-scanner.js",
         "scripts/scanner/product-detector.js",
@@ -45,7 +48,11 @@
         "https://lazada.com.sg/*",
         "https://www.lazada.com.sg/*",
         "https://shopee.sg/*",
-        "https://www.shopee.sg/*"
+        "https://www.shopee.sg/*",
+        "https://foodpanda.sg/*",
+        "https://www.foodpanda.sg/*",
+        "https://foodpanda.com.sg/*",
+        "https://www.foodpanda.com.sg/*"
       ],
       "run_at": "document_end"
     }
