@@ -1,5 +1,156 @@
+<!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        width: 300px;
+        padding: 16px;
+        font-family: Arial, sans-serif;
+        margin: 0;
+      }
+
+      h1 {
+        color: #2196f3;
+        font-size: 18px;
+        margin: 0 0 16px 0;
+        text-align: center;
+      }
+
+      .section {
+        margin-bottom: 16px;
+        padding: 12px;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        background: #f9f9f9;
+      }
+
+      .section h3 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        color: #333;
+      }
+
+      .toggle-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+      }
+
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 24px;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .slider {
+        background-color: #6f42c1;
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(26px);
+      }
+
+      .status-text {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+      }
+
+      .stats {
+        font-size: 11px;
+        color: #888;
+        margin-top: 8px;
+      }
+
+      .button {
+        background: #2196f3;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        margin-right: 8px;
+        margin-top: 8px;
+      }
+
+      .button:hover {
+        background: #1976d2;
+      }
+
+      .button.danger {
+        background: #f44336;
+      }
+
+      .button.danger:hover {
+        background: #d32f2f;
+      }
+    </style>
+  </head>
   <body>
-    <h1>Hello Extensions</h1>
+    <h1>🛍️ AutoGreen Extension</h1>
+
+    <div class="section">
+      <h3>Product Detection</h3>
+      <div id="basic-stats" class="stats">Loading...</div>
+    </div>
+
+    <div class="section">
+      <h3>Deep Scan Settings</h3>
+      <div class="toggle-container">
+        <span>Enable Deep Scan</span>
+        <label class="switch">
+          <input type="checkbox" id="deepScanToggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="deepScanStatus" class="status-text">
+        Deep scan extracts detailed product information including ingredients
+        and specifications.
+      </div>
+      <div id="deep-scan-stats" class="stats">Loading...</div>
+    </div>
+
+    <div class="section">
+      <h3>Actions</h3>
+      <button id="viewData" class="button">View Data</button>
+      <button id="clearData" class="button danger">Clear Data</button>
+      <button id="refreshStats" class="button">Refresh</button>
+    </div>
+
+    <script src="popup.js"></script>
   </body>
 </html>
