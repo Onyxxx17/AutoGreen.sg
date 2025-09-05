@@ -24,7 +24,7 @@
   
   "action": {
     "default_popup": "popup/popup.html",
-    "default_icon": "hello_extensions.png",
+    "default_icon": "autogreen.png",
     "default_title": "AutoGreen Product Scanner"
   },
   
