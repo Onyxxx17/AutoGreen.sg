@@ -8,11 +8,15 @@
  */
 
 const AutoGreenConfig = {
-  // Extension metadata
+  // ================================================
+  // 📋 EXTENSION METADATA
+  // ================================================
   VERSION: "1.0.0",
   NAME: "AutoGreen Product Scanner",
 
-  // Performance settings
+  // ================================================
+  // ⚡ PERFORMANCE SETTINGS
+  // ================================================
   PERFORMANCE: {
     BATCH_SIZE: 10, // Number of products to process at once
     SCROLL_DELAY: 500, // Milliseconds to wait after scroll stops
@@ -23,7 +27,9 @@ const AutoGreenConfig = {
     MIN_PRODUCT_NAME_LENGTH: 10, // Minimum characters for valid product name
   },
 
-  // UI settings
+  // ================================================
+  // 🎨 UI SETTINGS & STYLING
+  // ================================================
   UI: {
     INDICATOR_DURATION: 3000, // How long indicators stay visible
     Z_INDEX: 2147483647, // Ensure UI elements are on top

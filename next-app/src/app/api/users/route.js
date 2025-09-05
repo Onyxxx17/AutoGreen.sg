@@ -1,6 +1,22 @@
 import { NextResponse } from "next/server";
 import sql from "../../../../db/db";
 
+// CORS headers for browser extension
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400',
+};
+
+// Handle preflight OPTIONS request
+export async function OPTIONS(request) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: corsHeaders,
+  });
+}
+
 export async function POST(request) {
   try {
     // Check if request has a body
@@ -10,7 +26,7 @@ export async function POST(request) {
     if (!text) {
       return NextResponse.json(
         { success: false, error: "No request body" }, 
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -22,7 +38,7 @@ export async function POST(request) {
       console.error("JSON parse error:", parseError);
       return NextResponse.json(
         { success: false, error: "Invalid JSON format" }, 
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -32,7 +48,7 @@ export async function POST(request) {
     if (!userId || !sectorCode || points === undefined) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" }, 
-        { status: 400 }
+        { status: 400, headers: corsHeaders }
       );
     }
 
@@ -49,13 +65,15 @@ export async function POST(request) {
     return NextResponse.json({ 
       success: true, 
       message: `Awarded ${points} points to user in sector ${sectorCode}` 
+    }, {
+      headers: corsHeaders
     });
 
   } catch (error) {
     console.error('Database error:', error);
     return NextResponse.json(
       { success: false, error: error.message }, 
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

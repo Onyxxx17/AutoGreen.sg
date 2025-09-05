@@ -92,6 +92,22 @@ function initializeFoodPandaFeatures() {
   setTimeout(() => {
     checkAndDisplayEcoStatus();
     setupFoodPandaMonitoring();
+    
+    // Load any existing cutlery choice from previous pages
+    if (window.AutoGreenFoodPandaExtractor.getStoredCutleryChoice) {
+      const storedChoice = window.AutoGreenFoodPandaExtractor.getStoredCutleryChoice();
+      if (storedChoice) {
+        window.AutoGreenLogger.log("📋 Found stored cutlery choice from previous page:", storedChoice);
+      }
+    }
+    
+    // Initialize campaign monitoring
+    if (window.AutoGreenFoodPandaExtractor.setupCampaignMonitoring) {
+      window.AutoGreenFoodPandaExtractor.setupCampaignMonitoring();
+      window.AutoGreenLogger.log("🌱 Campaign monitoring initialized - Ready for Place Order detection!");
+    } else {
+      window.AutoGreenLogger.error("❌ Campaign monitoring setup function not found!");
+    }
   }, 2000);
 
   // Also monitor for any page changes that might load cutlery options
