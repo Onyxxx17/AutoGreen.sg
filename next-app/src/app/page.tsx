@@ -6,6 +6,8 @@ import RevealValue from "../../components/Value";
 import FAQSection from '../../components/FAQ';
 import EnvGallery from "../../components/EnvGallery";
 import { Reveal } from '../../components/Reveal';
+import Leaderboard from "../../components/Leaderboard";
+
 
 
 
@@ -15,37 +17,46 @@ export default function Page() {
       <Header />
 
       <main>
+
         {/* sec1 */}
-        <section className="relative min-h-[100vh] flex items-end bg-[#eafcec]">
-          {/* 2-col grid: keep ONLY the text inside so its layout is independent */}
-          <div className="mx-w-full max-w-7xl px-20 pb-20 grid gap-10 md:grid-cols-2">
-            {/* LEFT: text */}
-            <div className="max-w-2xl">
-              <h1 className="reveal-up relative inline-block text-6xl font-bold text-emerald-950">
-                <span className="shine-once">AutoGreen</span>
+        <section className="relative min-h-[100vh] flex items-start bg-[#eafcec] pt-82">
+          {/* 2-col grid: keep the text inside so its layout is independent */}
+          {/* LEFT: headline + two des */}
+          <div className="md:col-span-1 pl-6 md:pl-11">
+            <h1 className="text-[clamp(50px,8vw,100px)] leading-tight tracking-tight font-extrabold text-emerald-950">
+              AutoGreen
+              <span className="block text-[clamp(20px,5vw,40px)]">Greener by default.</span>
+            </h1>
 
+            <div className="mt-10 flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+              <p className="sm:w-[32ch] text-emerald-950/85 text-base md:text-lg">
+                High-impact, low-effort. We surface eco products and auto-select green
+                checkout options.
+              </p>
 
-              </h1>
+              {/* vertical divider */}
+              <span className="hidden sm:block w-px self-stretch bg-emerald-900/20" />
 
-              <p className="reveal-up-del mt-3 max-w-2xl text-neutral-700">
-                We highlight eco products and auto-select green checkout options.
+              <p className="sm:w-[32ch] text-emerald-950/85 text-base md:text-lg">
+                Built for SG Green Plan 2030 Sustainable Living, Energy Reset, City
+                in Nature, and a thriving Green Economy.
               </p>
             </div>
-
           </div>
 
-          {/* RIGHT: Spline is absolutely positioned so aspect ratio changes don't move the text */}
+          {/* RIGHT: Spline is absolutely positioned */}
           <div className="absolute right-3 bottom-2 w-[1500px] max-w-[200vw] aspect-[70/30]">
             <Script
               type="module"
-              src="https://unpkg.com/@splinetool/viewer@1.10.53/build/spline-viewer.js"
+              src="https://unpkg.com/@splinetool/viewer@1.10.56/build/spline-viewer.js"
               strategy="afterInteractive"
             />
+
             {/* @ts-expect-error – Spline custom element */}
-          
+
 
             <spline-viewer
-              url="https://prod.spline.design/OhSzJIc7wDvMGHm7/scene.splinecode"
+              url="https://prod.spline.design/9J6gTPffBxwJp2xg/scene.splinecode"
               className="absolute inset-0 h-full w-full"
               style={{ background: 'transparent' }}
             />
@@ -53,6 +64,9 @@ export default function Page() {
         </section>
 
 
+        {/* <script type="module" src="https://unpkg.com/@splinetool/viewer@1.10.56/build/spline-viewer.js"></script>
+        <spline-viewer url="https://prod.spline.design/9J6gTPffBxwJp2xg/scene.splinecode"></spline-viewer>
+ */}
 
 
         {/* Section 2 — Features */}
@@ -130,8 +144,9 @@ export default function Page() {
 
         <EnvGallery />
         <CountStats />
-
+        <Leaderboard />
         <FAQSection />
+        
         <RevealValue />
       </main>
 

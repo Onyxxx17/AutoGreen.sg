@@ -8,7 +8,13 @@ const dummyLeaderboard = [
 
 async function getLeaderboard(){
     try {
-        const result = await sql`SELECT sector,SUM(points) as total_points,COUNT(id) as user_count FROM users GROUP BY sector ORDER BY total_points DESC;`;
+        const result = await sql`SELECT sector,SUM(points) as
+                                 total_points,COUNT(id) as user_count 
+                                 FROM users 
+                                 GROUP BY sector 
+                                 ORDER BY total_points 
+                                 DESC;`;
+
         return result;
     } catch (error) {
         console.error(error);
