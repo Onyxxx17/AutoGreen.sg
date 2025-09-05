@@ -47,7 +47,6 @@
         "scripts/extractors/content-extractor.js",
         "scripts/extractors/iframe-extractor.js",
         "scripts/extractors/foodpanda-extractor.js",
-        "scripts/extractors/lazada-checkout-extractor.js",
         "scripts/scanner/deep-scanner-core.js",
         "scripts/scanner/deep-scanner.js",
         "scripts/scanner/product-detector.js",
