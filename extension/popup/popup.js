@@ -2,7 +2,14 @@
  * AutoGreen.sg Extension - Popup Controller
  *
  * Handles the popup interface for controlling extension settings
+ * 
+ * @author AutoGreen Team
+ * @version 1.0.0
  */
+
+// ================================================
+// 🚀 POPUP INITIALIZATION
+// ================================================
 
 document.addEventListener("DOMContentLoaded", async function () {
   console.log("[AutoGreen Popup] Initializing...");
@@ -22,6 +29,10 @@ document.addEventListener("DOMContentLoaded", async function () {
   // Set up event listeners
   setupEventListeners();
 
+  // ================================================
+  // 🔧 INITIALIZATION FUNCTIONS
+  // ================================================
+
   /**
    * Initialize popup with current settings and stats
    */
@@ -40,7 +51,7 @@ document.addEventListener("DOMContentLoaded", async function () {
 
       // Check if extension is active on current page
       const isValidPage =
-        tab.url && (tab.url.includes("lazada.") || tab.url.includes("shopee."));
+        tab.url && (tab.url.includes("lazada.") || tab.url.includes("foodpanda."));
 
       if (!isValidPage) {
         showInactivePage();
@@ -55,6 +66,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       showError("Failed to initialize popup");
     }
   }
+
+  // ================================================
+  // ⚙️ SETTINGS & STATS LOADING
+  // ================================================
 
   /**
    * Load current settings from storage
@@ -125,6 +140,10 @@ document.addEventListener("DOMContentLoaded", async function () {
       deepScanStats.textContent = "Failed to load deep scan stats";
     }
   }
+
+  // ================================================
+  // 🎛️ EVENT LISTENERS & CONTROLS
+  // ================================================
 
   /**
    * Set up event listeners

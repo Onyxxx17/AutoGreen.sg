@@ -3,40 +3,51 @@
   "description": "Intelligent product scanner for Lazada and FoodPanda that extracts product information and detects eco-friendly options",
   "version": "1.0.0",
   "manifest_version": 3,
-  "permissions": ["activeTab", "storage", "downloads"],
+  
+  "permissions": [
+    "activeTab", 
+    "storage", 
+    "downloads"
+  ],
+  
   "host_permissions": [
     "https://lazada.sg/*",
     "https://www.lazada.sg/*",
     "https://lazada.com.sg/*",
     "https://www.lazada.com.sg/*",
+    "https://checkout.lazada.sg/*",
     "https://foodpanda.sg/*",
     "https://www.foodpanda.sg/*",
     "https://foodpanda.com.sg/*",
     "https://www.foodpanda.com.sg/*"
   ],
+  
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": "hello_extensions.png",
     "default_title": "AutoGreen Product Scanner"
   },
+  
   "background": {
     "service_worker": "background.js"
   },
+  
   "content_scripts": [
     {
       "js": [
         "scripts/core/config.js",
         "scripts/utils/logger.js",
         "scripts/utils/dom-utils.js",
-        "scripts/extractors/product-extractor.js",
-        "scripts/storage/storage-utils.js",
         "scripts/utils/performance-utils.js",
         "scripts/utils/utils.js",
-        "scripts/ui/ui-manager.js",
+        "scripts/storage/storage-utils.js",
         "scripts/storage/data-storage.js",
+        "scripts/ui/ui-manager.js",
+        "scripts/extractors/product-extractor.js",
         "scripts/extractors/content-extractor.js",
         "scripts/extractors/iframe-extractor.js",
         "scripts/extractors/foodpanda-extractor.js",
+        "scripts/extractors/lazada-checkout-extractor.js",
         "scripts/scanner/deep-scanner-core.js",
         "scripts/scanner/deep-scanner.js",
         "scripts/scanner/product-detector.js",
@@ -48,6 +59,7 @@
         "https://www.lazada.sg/*",
         "https://lazada.com.sg/*",
         "https://www.lazada.com.sg/*",
+        "https://checkout.lazada.sg/*",
         "https://foodpanda.sg/*",
         "https://www.foodpanda.sg/*",
         "https://foodpanda.com.sg/*",
@@ -56,6 +68,7 @@
       "run_at": "document_end"
     }
   ],
+  
   "icons": {
     "16": "hello_extensions.png",
     "48": "hello_extensions.png",

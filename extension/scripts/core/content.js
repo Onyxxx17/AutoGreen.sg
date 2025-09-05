@@ -1,8 +1,5 @@
 /**
- * AutoGreen.sg Ext  ) {
-    console.warn("[AutoGreen] Dependencies not loaded yet, retrying...");
-    // Dependencies check - use logger instead of console.log for debugging
-    setTimeout(initializeAutoGreen, 500);n Content Script
+ * AutoGreen.sg Extension Content Script
  *
  * Entry point for the extension that initializes the product detector
  * and sets up debugging utilities.
@@ -42,37 +39,31 @@ function initializeAutoGreen() {
   window.AutoGreenLogger.log("Starting AutoGreen Extension...");
 
   try {
-    // Check what type of site this is
+    // ================================================
+    // 🌐 SITE DETECTION & ROUTING
+    // ================================================
+    
     const currentUrl = window.location.href;
     const isFoodPanda = window.AutoGreenConfig.URL_PATTERNS.FOODPANDA.DOMAIN.test(currentUrl);
     
     if (isFoodPanda) {
-      window.AutoGreenLogger.log("FoodPanda site detected, initializing eco-friendly features...");
+      window.AutoGreenLogger.log("🍴 FoodPanda site detected, initializing eco-friendly features...");
       initializeFoodPandaFeatures();
     } else {
-      window.AutoGreenLogger.log("E-commerce site detected, initializing product detection...");
-      
-      // Test deep scanner class first
-      if (typeof window.AutoGreenDeepScanner === 'function') {
-        window.AutoGreenLogger.log("Deep scanner class is available");
-      } else {
-        window.AutoGreenLogger.error("Deep scanner class is not a function:", typeof window.AutoGreenDeepScanner);
-      }
-
-      // Initialize main product detector
-      window.autoGreenDetector = new window.AutoGreenProductDetector();
-      
-      // Initialize eco-friendly product detector
-      window.AutoGreenLogger.log("Initializing eco-friendly product detector...");
-      window.autoGreenEcoDetector = new window.AutoGreenEcoProductDetector();
+      window.AutoGreenLogger.log("🛒 E-commerce site detected, initializing product detection...");
+      initializeEcommerceFeatures();
     }
     
-    window.AutoGreenLogger.log("AutoGreen Extension initialized successfully");
+    window.AutoGreenLogger.log("✅ AutoGreen Extension initialized successfully");
   } catch (error) {
-    window.AutoGreenLogger.error("Failed to initialize AutoGreen:", error);
+    window.AutoGreenLogger.error("❌ Failed to initialize AutoGreen:", error);
     window.AutoGreenLogger.error("Error details:", error.stack);
   }
 }
+
+// ================================================
+// 🍴 FOODPANDA INITIALIZATION
+// ================================================
 
 /**
  * Initialize FoodPanda-specific features
@@ -85,34 +76,72 @@ function initializeFoodPandaFeatures() {
 
   window.AutoGreenLogger.log("Initializing FoodPanda eco-friendly features...");
 
-  // Check for eco-friendly options on any FoodPanda page (not just cart)
-  window.AutoGreenLogger.log("Checking for eco-friendly options on any FoodPanda page...");
-  
-  // Wait a bit for the page to fully load
+  // Wait for page to fully load before initializing
   setTimeout(() => {
     checkAndDisplayEcoStatus();
     setupFoodPandaMonitoring();
-    
-    // Load any existing cutlery choice from previous pages
-    if (window.AutoGreenFoodPandaExtractor.getStoredCutleryChoice) {
-      const storedChoice = window.AutoGreenFoodPandaExtractor.getStoredCutleryChoice();
-      if (storedChoice) {
-        window.AutoGreenLogger.log("📋 Found stored cutlery choice from previous page:", storedChoice);
-      }
-    }
-    
-    // Initialize campaign monitoring
-    if (window.AutoGreenFoodPandaExtractor.setupCampaignMonitoring) {
-      window.AutoGreenFoodPandaExtractor.setupCampaignMonitoring();
-      window.AutoGreenLogger.log("🌱 Campaign monitoring initialized - Ready for Place Order detection!");
-    } else {
-      window.AutoGreenLogger.error("❌ Campaign monitoring setup function not found!");
-    }
+    loadStoredCutleryChoice();
+    initializeCampaignMonitoring();
   }, 2000);
 
-  // Also monitor for any page changes that might load cutlery options
+  // Monitor for page changes
   monitorForPageChanges();
 }
+
+// ================================================
+// 🛒 E-COMMERCE INITIALIZATION  
+// ================================================
+
+/**
+ * Initialize e-commerce site features (Lazada, etc.)
+ */
+function initializeEcommerceFeatures() {
+  // Validate deep scanner availability
+  if (typeof window.AutoGreenDeepScanner === 'function') {
+    window.AutoGreenLogger.log("Deep scanner class is available");
+  } else {
+    window.AutoGreenLogger.error("Deep scanner class is not a function:", typeof window.AutoGreenDeepScanner);
+  }
+
+  // Initialize main product detector
+  window.autoGreenDetector = new window.AutoGreenProductDetector();
+  
+  // Initialize eco-friendly product detector
+  window.AutoGreenLogger.log("Initializing eco-friendly product detector...");
+  window.autoGreenEcoDetector = new window.AutoGreenEcoProductDetector();
+}
+
+// ================================================
+// 🍴 FOODPANDA HELPER FUNCTIONS
+// ================================================
+
+/**
+ * Load stored cutlery choice from previous pages
+ */
+function loadStoredCutleryChoice() {
+  if (window.AutoGreenFoodPandaExtractor.getStoredCutleryChoice) {
+    const storedChoice = window.AutoGreenFoodPandaExtractor.getStoredCutleryChoice();
+    if (storedChoice) {
+      window.AutoGreenLogger.log("📋 Found stored cutlery choice from previous page:", storedChoice);
+    }
+  }
+}
+
+/**
+ * Initialize campaign monitoring system
+ */
+function initializeCampaignMonitoring() {
+  if (window.AutoGreenFoodPandaExtractor.setupCampaignMonitoring) {
+    window.AutoGreenFoodPandaExtractor.setupCampaignMonitoring();
+    window.AutoGreenLogger.log("🌱 Campaign monitoring initialized - Ready for Place Order detection!");
+  } else {
+    window.AutoGreenLogger.error("❌ Campaign monitoring setup function not found!");
+  }
+}
+
+// ================================================
+// 🎯 ECO-FRIENDLY STATUS & MONITORING
+// ================================================
 
 /**
  * Check and display eco-friendly status
@@ -163,13 +192,17 @@ function setupFoodPandaMonitoring() {
       }
     });
 
-    // Store cleanup function
+    // Store cleanup function for later use
     window.autoGreenFoodPandaCleanup = cleanup;
     
   } catch (error) {
     window.AutoGreenLogger.error("Error setting up FoodPanda monitoring:", error);
   }
 }
+
+// ================================================
+// 📱 PAGE CHANGE MONITORING
+// ================================================
 
 /**
  * Monitor for page changes that might load cutlery options
@@ -216,6 +249,10 @@ function monitorForPageChanges() {
     }, 1000);
   });
 }
+
+// ================================================
+// 🛠️ DEBUG UTILITIES & TESTING
+// ================================================
 
 /**
  * Set up debugging utilities for development
@@ -425,6 +462,10 @@ function setupDebugUtilities() {
   }
 }
 
+// ================================================
+// 📨 MESSAGE HANDLING & POPUP COMMUNICATION
+// ================================================
+
 /**
  * Set up message listener for popup communication
  */
@@ -535,15 +576,22 @@ function setupMessageListener() {
   });
 }
 
-// Initialize based on document ready state
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => {
-    initializeAutoGreen();
-    setupDebugUtilities();
-    setupMessageListener();
-  });
-} else {
+// ================================================
+// 🚀 INITIALIZATION & STARTUP
+// ================================================
+
+/**
+ * Initialize the extension based on document ready state
+ */
+function initializeExtension() {
   initializeAutoGreen();
   setupDebugUtilities();
   setupMessageListener();
+}
+
+// Start the extension
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeExtension);
+} else {
+  initializeExtension();
 }
