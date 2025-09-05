@@ -18,26 +18,33 @@ export default function Header() {
     const [activeId, setActiveId] = useState<string>("");
 
     useEffect(() => {
-        const ids = ["features", "leaderboard", "contact"]; // the sections to watch
+        const IDS = ["features", "leaderboard", "faq", "contact"]; // must match section ids
+
+        const sections = IDS
+            .map((id) => document.getElementById(id))
+            .filter(Boolean) as HTMLElement[];
+
         const io = new IntersectionObserver(
             (entries) => {
-                entries.forEach((e) => {
-                    if (e.isIntersecting) setActiveId(e.target.id);
-                });
+                // choose the section most visible in the viewport
+                const visible = entries
+                    .filter((e) => e.isIntersecting)
+                    .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+                if (visible?.target?.id) setActiveId(visible.target.id);
             },
             {
-                rootMargin: "-30% 0px -60% 0px",
-                threshold: 0.01,
+                // “spy” around the middle of the viewport
+                root: null,
+                rootMargin: "-45% 0px -45% 0px",
+                threshold: [0, 0.25, 0.5, 0.75, 1],
             }
         );
 
-        ids.forEach((id) => {
-            const el = document.getElementById(id);
-            if (el) io.observe(el);
-        });
-
+        sections.forEach((el) => io.observe(el));
         return () => io.disconnect();
     }, []);
+
 
     return (
 
