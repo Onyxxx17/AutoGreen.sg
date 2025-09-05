@@ -1,6 +1,6 @@
 {
   "name": "AutoGreen Product Scanner",
-  "description": "Intelligent product scanner for Lazada, and FoodPanda that extracts and analyzes product information with advanced deep scanning and eco-friendly option detection",
+  "description": "Intelligent product scanner for Lazada and FoodPanda that extracts product information and detects eco-friendly options",
   "version": "1.0.0",
   "manifest_version": 3,
   "permissions": ["activeTab", "storage", "downloads"],
@@ -40,6 +40,7 @@
         "scripts/scanner/deep-scanner-core.js",
         "scripts/scanner/deep-scanner.js",
         "scripts/scanner/product-detector.js",
+        "scripts/scanner/eco-product-detector.js",
         "scripts/core/content.js"
       ],
       "matches": [
@@ -47,8 +48,6 @@
         "https://www.lazada.sg/*",
         "https://lazada.com.sg/*",
         "https://www.lazada.com.sg/*",
-        "https://shopee.sg/*",
-        "https://www.shopee.sg/*",
         "https://foodpanda.sg/*",
         "https://www.foodpanda.sg/*",
         "https://foodpanda.com.sg/*",

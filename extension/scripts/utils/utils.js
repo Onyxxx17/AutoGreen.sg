@@ -102,7 +102,7 @@ const AutoGreenUtils = {
     const missing = dependencies.filter(dep => !window[dep]);
     
     if (missing.length > 0) {
-      console.error('[AutoGreen Utils] Missing dependencies:', missing);
+      window.AutoGreenLogger?.error('[AutoGreen Utils] Missing dependencies:', missing);
       return false;
     }
 
@@ -112,7 +112,7 @@ const AutoGreenUtils = {
   // Initialize utilities
   initialize() {
     if (!this.checkDependencies()) {
-      console.error('[AutoGreen Utils] Cannot initialize - missing dependencies');
+      window.AutoGreenLogger?.error('[AutoGreen Utils] Cannot initialize - missing dependencies');
       return false;
     }
 

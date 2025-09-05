@@ -56,6 +56,50 @@ class UIManager {
   }
 
   /**
+   * Create and maintain an eco-friendly products counter display
+   */
+  showEcoCounter(count) {
+    try {
+      let counter = document.getElementById("autogreen-eco-counter");
+
+      if (!counter) {
+        counter = this.createEcoCounterElement();
+        document.body.appendChild(counter);
+        this.indicators.set("eco-counter", counter);
+      }
+
+      counter.textContent = `EcoFriendly Products Found: ${count}`;
+    } catch (error) {
+      this.logger.error("Failed to update eco counter:", error);
+    }
+  }
+
+  /**
+   * Create eco-friendly counter element
+   */
+  createEcoCounterElement() {
+    const counter = document.createElement("div");
+    counter.id = "autogreen-eco-counter";
+
+    counter.style.cssText = `
+      position: fixed !important;
+      bottom: 20px !important;
+      right: 20px !important;
+      background: linear-gradient(135deg, #4CAF50, #45A049) !important;
+      color: white !important;
+      padding: 10px 15px !important;
+      z-index: ${this.config.UI.Z_INDEX} !important;
+      font-family: Arial, sans-serif !important;
+      font-size: 14px !important;
+      font-weight: bold !important;
+      border-radius: 20px !important;
+      border: 2px solid #2E7D32 !important;
+    `;
+
+    return counter;
+  }
+
+  /**
    * Show deep scan progress indicator
    */
   showDeepScanProgress(queueLength, activeScans) {

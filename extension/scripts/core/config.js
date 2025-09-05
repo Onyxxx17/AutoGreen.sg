@@ -213,6 +213,8 @@ const AutoGreenConfig = {
     PRODUCTS: "autogreen_products",
     DEEP_SCAN_ENABLED: "autogreen_deep_scan_enabled",
     DEEP_SCAN_DATA: "autogreen_deep_scan_data",
+    ECO_PRODUCTS: "autogreen_eco_products",
+    ECO_STATS: "autogreen_eco_stats",
     SETTINGS: "autogreen_settings",
   },
 

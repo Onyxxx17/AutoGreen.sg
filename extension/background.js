@@ -9,15 +9,7 @@
 
 // Handle extension installation
 chrome.runtime.onInstalled.addListener((details) => {
-  console.log(
-    "[AutoGreen Background] Extension installed/updated:",
-    details.reason
-  );
-
   if (details.reason === "install") {
-    // First-time installation
-    console.log("[AutoGreen Background] First-time installation detected");
-
     // Initialize storage with default settings
     chrome.storage.local.set({
       autogreen_deep_scan_enabled: false,
@@ -35,11 +27,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       tab.url.includes("foodpanda.");
 
     if (isValidSite) {
-      console.log(
-        "[AutoGreen Background] Valid e-commerce site detected:",
-        tab.url
-      );
-
       // Update extension badge to show it's active
       chrome.action.setBadgeText({
         tabId: tabId,
@@ -62,12 +49,9 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 // Handle messages from content scripts
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log("[AutoGreen Background] Received message:", request.action);
-
   switch (request.action) {
     case "log_analytics":
       // Handle analytics logging if needed
-      console.log("[AutoGreen Analytics]", request.data);
       sendResponse({ success: true });
       break;
 
@@ -86,10 +70,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // Handle extension startup
 chrome.runtime.onStartup.addListener(() => {
-  console.log("[AutoGreen Background] Extension started");
+  // Extension started
 });
 
 // Clean up on extension suspension
 chrome.runtime.onSuspend.addListener(() => {
-  console.log("[AutoGreen Background] Extension suspending");
+  // Extension suspending
 });

@@ -358,12 +358,41 @@ class AutoGreenState {
           if (data.userStats) {
             this.userStats = { ...this.userStats, ...data.userStats };
           }
+
+          // Load eco-friendly statistics
+          await this.loadEcoStats();
+          
         } catch (error) {
           console.error('Failed to load from storage:', error);
           this.loadDemoData();
         }
       } else {
         this.loadDemoData();
+      }
+    }
+
+    /**
+     * Load eco-friendly statistics from local storage
+     */
+    async loadEcoStats() {
+      try {
+        const ecoData = await new Promise((resolve, reject) => {
+          chrome.storage.local.get(['autogreen_eco_products'], (result) => {
+            if (chrome.runtime.lastError) {
+              reject(chrome.runtime.lastError);
+            } else {
+              resolve(result);
+            }
+          });
+        });
+
+        if (ecoData.autogreen_eco_products) {
+          const ecoStats = ecoData.autogreen_eco_products;
+          this.userStats.ecoProducts = ecoStats.totalEcoProducts || 0;
+          console.log('Loaded eco-friendly stats:', ecoStats);
+        }
+      } catch (error) {
+        console.error('Failed to load eco stats:', error);
       }
     }
   
@@ -378,7 +407,7 @@ class AutoGreenState {
         noCutlery: 8,
         greenDelivery: 4,
         paperless: 11,
-        ecoProducts: 3
+        ecoProducts: 15
       };
     }
   

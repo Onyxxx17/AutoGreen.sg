@@ -11,11 +11,20 @@ An intelligent Chrome extension that automatically detects and analyzes products
 ### Core Functionality
 
 - **📦 Smart Product Detection**: Advanced scroll-based detection with viewport optimization
+- **🌱 Eco-Friendly Product Detection**: Automatic identification and highlighting of sustainable products
 - **🔍 Deep Scanning**: Comprehensive analysis of individual product pages with iframe-based extraction
 - **💾 Robust Data Storage**: Multi-layered storage system with automatic backup and recovery
 - **🎯 Intelligent Filtering**: Advanced validation with site-specific rules
 - **⚡ Performance Optimized**: Modular architecture with efficient batch processing
 - **🛡️ Error Recovery**: Comprehensive error handling with fallback mechanisms
+
+### Environmental Features
+
+- **🌿 Keyword Detection**: Scans for eco-friendly terms in product titles and descriptions
+- **🎨 Visual Indicators**: Green borders and eco badges for sustainable products
+- **📊 Impact Tracking**: Statistics on eco-friendly products discovered
+- **💡 Smart Recognition**: Multi-tier keyword system for accurate detection
+- **🔄 Real-time Updates**: Dynamic scanning for newly loaded content
 
 ### Supported Platforms
 
@@ -60,6 +69,19 @@ cd AutoGreen.sg/extension
 3. **Monitor Progress** via the floating UI indicators
 4. **View Statistics** by clicking the extension icon
 5. **Export Data** using the "Export Data" button in the popup
+
+### Eco-Friendly Product Detection
+
+1. **Automatic Scanning** - Products are continuously scanned for eco-friendly keywords
+2. **Visual Indicators** - Look for green borders and 🌱 ECO badges on sustainable products
+3. **Hover Details** - Hover over eco indicators to see matched keywords
+4. **Statistics Tracking** - View eco-friendly product counts in real-time
+5. **Impact Monitoring** - Check your cumulative eco-friendly discoveries in the popup
+
+#### Detected Keywords Include:
+- **Primary**: eco-friendly, sustainable, biodegradable, organic, bamboo, solar, recycled
+- **Secondary**: plastic-free, energy efficient, fair trade, locally sourced, zero waste
+- **Materials**: cork, hemp, stainless steel, plant-based, FSC certified
 
 ### Deep Scanning
 

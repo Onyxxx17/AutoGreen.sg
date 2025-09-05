@@ -1,5 +1,8 @@
 /**
- * AutoGreen.sg Extension - Main Content Script
+ * AutoGreen.sg Ext  ) {
+    console.warn("[AutoGreen] Dependencies not loaded yet, retrying...");
+    // Dependencies check - use logger instead of console.log for debugging
+    setTimeout(initializeAutoGreen, 500);n Content Script
  *
  * Entry point for the extension that initializes the product detector
  * and sets up debugging utilities.
@@ -19,7 +22,8 @@ function initializeAutoGreen() {
     !window.AutoGreenUtils ||
     !window.AutoGreenUIManager ||
     !window.AutoGreenProductDetector ||
-    !window.AutoGreenDeepScanner
+    !window.AutoGreenDeepScanner ||
+    !window.AutoGreenEcoProductDetector
   ) {
     console.warn("[AutoGreen] Dependencies not loaded yet, retrying...");
     console.log("[AutoGreen] Available dependencies:", {
@@ -28,7 +32,8 @@ function initializeAutoGreen() {
       utils: !!window.AutoGreenUtils,
       uiManager: !!window.AutoGreenUIManager,
       productDetector: !!window.AutoGreenProductDetector,
-      deepScanner: !!window.AutoGreenDeepScanner
+      deepScanner: !!window.AutoGreenDeepScanner,
+      ecoDetector: !!window.AutoGreenEcoProductDetector
     });
     setTimeout(initializeAutoGreen, 100);
     return;
@@ -54,7 +59,12 @@ function initializeAutoGreen() {
         window.AutoGreenLogger.error("Deep scanner class is not a function:", typeof window.AutoGreenDeepScanner);
       }
 
+      // Initialize main product detector
       window.autoGreenDetector = new window.AutoGreenProductDetector();
+      
+      // Initialize eco-friendly product detector
+      window.AutoGreenLogger.log("Initializing eco-friendly product detector...");
+      window.autoGreenEcoDetector = new window.AutoGreenEcoProductDetector();
     }
     
     window.AutoGreenLogger.log("AutoGreen Extension initialized successfully");
@@ -374,13 +384,13 @@ function setupDebugUtilities() {
         try {
           if (window.AutoGreenFoodPandaExtractor) {
             const cleanup = window.AutoGreenFoodPandaExtractor.monitorCutleryToggle((status) => {
-              console.log("Test monitoring - cutlery changed:", status);
+              window.AutoGreenLogger?.debug("Test monitoring - cutlery changed:", status);
             });
             
             // Clean up after 10 seconds
             setTimeout(() => {
               if (cleanup) cleanup();
-              console.log("Test monitoring stopped");
+              window.AutoGreenLogger?.debug("Test monitoring stopped");
             }, 10000);
             
             return { success: true, message: "Monitoring started for 10 seconds" };
@@ -393,7 +403,7 @@ function setupDebugUtilities() {
       }
     };
 
-    console.log(
+    window.AutoGreenLogger?.log(
       "[AutoGreen] Debug utilities available via window.AutoGreenDebug"
     );
   }
