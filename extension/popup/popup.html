@@ -94,27 +94,19 @@
 
     <!-- Quick Actions -->
     <section class="quick-actions-section">
-      <h3 class="section-title">Quick Actions</h3>
-      <div class="actions-grid">
-        <button id="viewData" class="action-btn action-green">
-          <span class="action-text">View Data</span>
-        </button>
-        <button id="clearData" class="action-btn action-red">
-          <span class="action-text">Clear Data</span>
-        </button>
-        <button id="refreshStats" class="action-btn action-gray">
-          <span class="action-text">Refresh</span>
-        </button>
-        <button onclick="openWebsite()" class="action-btn action-green">
-          <span class="action-text">Learn More</span>
-          <small class="action-subtitle">Visit website</small>
-        </button>
-        <button onclick="openLeaderboard()" class="action-btn action-yellow">
-          <span class="action-text">Leaderboard</span>
-          <small class="action-subtitle">View rankings</small>
-        </button>
+      <h3>Quick Actions</h3>
+    
+      <div class="actions-row-primary">
+        <button id="viewData" class="action-btn view-data">View Data</button>
+        <button id="clearData" class="action-btn clear-data">Clear Data</button>
+        <button id="refreshStats" class="action-btn refresh">Refresh</button>
       </div>
-    </section>
+    
+      <div class="actions-row-secondary">
+        <button onclick="openWebsite()" class="action-btn">Learn More</button>
+        <button onclick="openLeaderboard()" class="action-btn">Leaderboard</button>
+      </div>
+    </section>     
 
     <!-- Extension Control -->
     <section class="control-section">
@@ -122,9 +114,6 @@
       <button id="toggle-btn" class="toggle-btn toggle-enabled">
         <span class="toggle-text">Enabled</span>
       </button>
-      <div class="status-message">
-        <span id="detection-status" class="status-text-small">Monitoring eco-friendly options...</span>
-      </div>
     </section>
   </main>
 
