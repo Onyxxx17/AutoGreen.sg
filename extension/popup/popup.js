@@ -19,9 +19,6 @@ document.addEventListener("DOMContentLoaded", async function () {
   const deepScanStatus = document.getElementById("deepScanStatus");
   const deepScanStats = document.getElementById("deep-scan-stats");
   const basicStats = document.getElementById("basic-stats");
-  const viewDataBtn = document.getElementById("viewData");
-  const clearDataBtn = document.getElementById("clearData");
-  const refreshStatsBtn = document.getElementById("refreshStats");
 
   // Initialize popup
   await initializePopup();
@@ -176,78 +173,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         showError("Failed to toggle deep scan");
       }
     });
-
-    // View data button
-    viewDataBtn.addEventListener("click", async function () {
-      try {
-        const [tab] = await chrome.tabs.query({
-          active: true,
-          currentWindow: true,
-        });
-
-        const result = await chrome.tabs.sendMessage(tab.id, {
-          action: "exportData",
-        });
-
-        if (result && result.data) {
-          // Create a blob and download it
-          const blob = new Blob([JSON.stringify(result.data, null, 2)], {
-            type: "application/json",
-          });
-          const url = URL.createObjectURL(blob);
-
-          await chrome.downloads.download({
-            url: url,
-            filename: `autogreen-data-${
-              new Date().toISOString().split("T")[0]
-            }.json`,
-          });
-
-          showSuccess("Data exported successfully");
-        }
-      } catch (error) {
-        console.error("[AutoGreen Popup] Export error:", error);
-        showError("Failed to export data");
-      }
-    });
-
-    // Clear data button
-    clearDataBtn.addEventListener("click", async function () {
-      if (
-        !confirm(
-          "Are you sure you want to clear all data? This cannot be undone."
-        )
-      ) {
-        return;
-      }
-
-      try {
-        const [tab] = await chrome.tabs.query({
-          active: true,
-          currentWindow: true,
-        });
-
-        const result = await chrome.tabs.sendMessage(tab.id, {
-          action: "clearAllData",
-        });
-
-        if (result && result.success) {
-          await loadStats(); // Refresh stats
-          showSuccess("All data cleared");
-        } else {
-          showError("Failed to clear data");
-        }
-      } catch (error) {
-        console.error("[AutoGreen Popup] Clear error:", error);
-        showError("Failed to clear data");
-      }
-    });
-
-    // Refresh stats button
-    refreshStatsBtn.addEventListener("click", async function () {
-      await loadStats();
-      showSuccess("Stats refreshed");
-    });
   }
 
   /**
@@ -272,23 +197,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     deepScanStatus.textContent = `❌ ${message}`;
     deepScanStatus.style.color = "#f44336";
   }
-
-  /**
-   * Show success message
-   */
-  function showSuccess(message) {
-    const originalText = deepScanStatus.textContent;
-    const originalColor = deepScanStatus.style.color;
-
-    deepScanStatus.textContent = `✅ ${message}`;
-    deepScanStatus.style.color = "#4CAF50";
-
-    setTimeout(() => {
-      deepScanStatus.textContent = originalText;
-      deepScanStatus.style.color = originalColor;
-    }, 2000);
-  }
-
   /**
    * Show inactive page message
    */
