@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   await initializeApp();
 });
 
+
 // ================================================
 // 📊 STATE MANAGEMENT
 // ================================================
@@ -195,6 +196,7 @@ class AutoGreenUI {
       });
     }
 
+
     // Quick action buttons
     const viewDataBtn = document.getElementById('viewData');
     const clearDataBtn = document.getElementById('clearData');
@@ -319,6 +321,22 @@ class AutoGreenUI {
       if (basicStats) basicStats.textContent = 'Stats unavailable';
       if (deepStats) deepStats.textContent = 'Deep scan stats unavailable';
     }
+
+//         if (result && result.success) {
+//           updateDeepScanStatus(this.checked);
+//           await loadStats(); // Refresh stats
+//         } else {
+//           // Revert toggle if failed
+//           this.checked = !this.checked;
+//           showError("Failed to toggle deep scan");
+//         }
+//       } catch (error) {
+//         console.error("[AutoGreen Popup] Toggle error:", error);
+//         this.checked = !this.checked;
+//         showError("Failed to toggle deep scan");
+//       }
+//     });
+
   }
 
   /**
