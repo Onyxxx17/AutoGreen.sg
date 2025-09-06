@@ -9,6 +9,7 @@
 
 AutoGreen.sg is a comprehensive sustainability platform designed to support Singapore's Green Plan 2030 initiatives. It combines an intelligent Chrome extension with a modern web application to promote sustainable living through automated eco-product detection and green checkout optimization.
 
+🌐 **Live Application:** [https://autogreen-sg.vercel.app/](https://autogreen-sg.vercel.app/)
 ## 🎯 Mission
 
 Built for Singapore's Green Plan 2030 pillars:
