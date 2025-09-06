@@ -229,15 +229,6 @@ class AutoGreenState {
         'grab', 'foodpanda', 'deliveroo', 'lazada', 'shopee', 
         'redmart', 'fairprice', 'amazon.sg', 'carousell'
       ];
-      this.ecoTips = [
-        "Choosing 'No cutlery' saves ~15g plastic per order and earns you +1 Green Point!",
-        "Green delivery reduces carbon emissions by up to 40% and earns +2 Points!",
-        "Paperless receipts help save ~3M trees/year in Singapore. +1 Point each!",
-        "Consolidating deliveries cuts packaging waste by 60%. Smart shopping!",
-        "Eco-friendly products use 50% less water in production. +3 Points each!",
-        "Bringing your own bag saves 1kg of plastic per month on average.",
-        "Local products cut transport emissions by 70%. Support local businesses!"
-      ];
     }
   
     /**
@@ -403,20 +394,6 @@ class AutoGreenState {
           this.handleExtensionMessage(message);
         });
       }
-  
-      // Click outside modal to close
-      document.getElementById('eco-tip-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'eco-tip-modal') {
-          this.closeEcoTip();
-        }
-      });
-  
-      // Keyboard navigation
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          this.closeEcoTip();
-        }
-      });
     }
   
     /**
@@ -523,30 +500,6 @@ class AutoGreenState {
         btn.className = 'toggle-btn toggle-disabled';
       }
       this.initializeLucideIcons();
-    }
-  
-    /**
-     * Show random eco tip modal
-     */
-    showEcoTip() {
-      const randomTip = this.state.ecoTips[Math.floor(Math.random() * this.state.ecoTips.length)];
-      const modal = document.getElementById('eco-tip-modal');
-      const content = document.getElementById('tip-content');
-      
-      content.textContent = randomTip;
-      modal.classList.remove('hidden');
-      
-      // Focus management for accessibility
-      const modalContent = modal.querySelector('.modal-content');
-      modalContent.focus();
-    }
-  
-    /**
-     * Close eco tip modal
-     */
-    closeEcoTip() {
-      const modal = document.getElementById('eco-tip-modal');
-      modal.classList.add('hidden');
     }
   
     /**
@@ -682,30 +635,6 @@ class AutoGreenState {
   function toggleExtension() {
     if (app && app.ui) {
       app.ui.toggleExtension();
-    }
-  }
-  
-  function showEcoTip() {
-    if (app && app.ui) {
-      app.ui.showEcoTip();
-    }
-  }
-  
-  function closeEcoTip() {
-    if (app && app.ui) {
-      app.ui.closeEcoTip();
-    }
-  }
-  
-  function openWebsite() {
-    if (app && app.ui) {
-      app.ui.openUrl('https://autogreen-sg.vercel.app');
-    }
-  }
-  
-  function openLeaderboard() {
-    if (app && app.ui) {
-      app.ui.openUrl('https://autogreen-sg.vercel.app/leaderboard');
     }
   }
   
