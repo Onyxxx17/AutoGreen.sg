@@ -15,6 +15,12 @@ export default function Footer() {
               <Link href="/#features" className="hover:underline">About</Link>
             </li>
             <li>
+              <Link href="/#leaderboard" className="hover:underline">Leaderboard</Link>
+            </li>
+            <li>
+              <Link href="/#faq" className="hover:underline">FAQ</Link>
+            </li>
+            <li>
               <Link href="/#contact" className="hover:underline">Contact Us</Link>
             </li>
           </ul>
