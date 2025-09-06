@@ -612,24 +612,3 @@ async function initializeApp() {
     console.error('Failed to start AutoGreen popup:', error);
   }
 }
-
-/**
- * Global functions for HTML onclick handlers
- */
-function openWebsite() {
-  if (typeof chrome !== 'undefined' && chrome.tabs) {
-    chrome.tabs.create({ url: 'https://autogreen-sg.vercel.app' });
-    window.close();
-  } else {
-    window.open('https://autogreen-sg.vercel.app', '_blank');
-  }
-}
-
-function openLeaderboard() {
-  if (typeof chrome !== 'undefined' && chrome.tabs) {
-    chrome.tabs.create({ url: 'https://autogreen-sg.vercel.app/leaderboard' });
-    window.close();
-  } else {
-    window.open('https://autogreen-sg.vercel.app/leaderboard', '_blank');
-  }
-}

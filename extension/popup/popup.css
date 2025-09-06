@@ -447,6 +447,11 @@ input:checked + .slider:before {
   box-shadow: var(--shadow-md);
 }
 
+a {
+  text-decoration: none;
+}
+
+
 /* Control Section */
 .control-section {
   padding-top: var(--space-4);
