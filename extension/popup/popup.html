@@ -1,107 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AutoGreen.sg</title>
-    <link rel="stylesheet" href="popup.css" />
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AutoGreen.sg</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
 
-  <body>
-    <!-- Header -->
-    <header class="header">
-      <div class="header-bg"></div>
-      <div class="header-content">
-        <div class="brand-section">
-          <img src="../autogreen.png" alt="AutoGreen Logo" class="logo">
-          <div class="brand-info">
-            <h1 class="brand-title">AutoGreen.sg</h1>
-            <p class="brand-subtitle">Intelligent Product Scanner</p>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="brand-section">
+      <img src="../autogreen.png" alt="AutoGreen Logo" class="logo">
+      <div class="brand-info">
+        <h1 class="brand-title">AutoGreen.sg</h1>
+        <p class="brand-subtitle">Intelligent Product Scanner</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Impact Section -->
+    <section class="impact-section">
+      <h2 class="section-title">Your Impact</h2>
+      <div class="stats-grid">
+        <div class="stat-card stat-card-green">
+          <div class="card-decoration"></div>
+          <div class="card-content">
+            <span class="card-label">Green Points</span>
+            <div id="user-points" class="card-value">0</div>
+          </div>
+        </div>
+        <div class="stat-card stat-card-blue">
+          <div class="card-decoration"></div>
+          <div class="card-content">
+            <span class="card-label">Items Saved</span>
+            <div id="items-saved" class="card-value">0</div>
           </div>
         </div>
       </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main-content">
-      <!-- Impact Section -->
-      <section class="impact-section">
-        <div class="section-header">
-          <h2 class="section-title">Your Impact</h2>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-card stat-card-green">
-            <div class="card-decoration"></div>
-            <div class="card-content">
-              <div class="card-header">
-                <span class="card-label">Green Points</span>
-              </div>
-              <div id="user-points" class="card-value">0</div>
-            </div>
-          </div>
-          <div class="stat-card stat-card-blue">
-            <div class="card-decoration"></div>
-            <div class="card-content">
-              <div class="card-header">
-                <span class="card-label">Items Saved</span>
-              </div>
-              <div id="items-saved" class="card-value">0</div>
-            </div>
-          </div>
-        </div>
-      </section>
+    </section>
         
-        <!-- Product Detection -->
-        <div class="section">
-          <h3>Product Detection</h3>
-          <div id="basic-stats" class="stats">Loading...</div>
+    <!-- Product Detection Section -->
+    <section class="feature-section detection-section">
+      <div class="feature-header">
+        <div class="feature-icon detection-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 12l2 2 4-4"/>
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
         </div>
-        
-        <!-- Deep Scan Settings -->
-        <div class="section">
-          <h3>Deep Scan Settings</h3>
-          <div class="toggle-container">
-            <span>Enable Deep Scan</span>
-            <label class="switch">
-              <input type="checkbox" id="deepScanToggle" />
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div id="deepScanStatus" class="status-text">
-            Deep scan extracts detailed product information including ingredients
-            and specifications.
-          </div>
-          <div id="deep-scan-stats" class="stats">Loading...</div>
+        <div class="feature-info">
+          <h3 class="feature-title">Product Detection</h3>
+          <p class="feature-subtitle">Real-time scanning status</p>
         </div>
-
-      </section>
-
-      <!-- Quick Actions -->
-      <section class="quick-actions-section">
-        <h3>Quick Actions</h3>
-        <div class="actions-grid">
-          <button id="viewData" class="action-btn action-green">View Data</button>
-          <button id="clearData" class="action-btn action-red">Clear Data</button>
-          <button id="refreshStats" class="action-btn action-gray">Refresh</button>
-          <button onclick="openWebsite()" class="action-btn action-green">
-            Learn More<br><small>Visit website</small>
-          </button>
-          <button onclick="openLeaderboard()" class="action-btn action-yellow">
-            Leaderboard<br><small>View rankings</small>
-          </button>
+      </div>
+      <div class="feature-stats">
+        <div id="basic-stats" class="stats-display">Loading...</div>
+      </div>
+    </section>
+    
+    <!-- Deep Scan Settings Section -->
+    <section class="feature-section deep-scan-section">
+      <div class="feature-header">
+        <div class="feature-icon scan-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+            <circle cx="11" cy="11" r="3"/>
+          </svg>
         </div>
-      </section>
-
-      <!-- Extension Control -->
-      <section class="control-section">
-        <h3>Extension Control</h3>
-        <button id="toggle-btn" class="toggle-btn toggle-enabled">Enabled</button>
-        <div class="status-message">
-          <span id="detection-status" class="status-text-small">Monitoring eco-friendly options...</span>
+        <div class="feature-info">
+          <h3 class="feature-title">Deep Scan</h3>
+          <p class="feature-subtitle">Enhanced analysis mode</p>
         </div>
-      </section>
-    </main>
+        <div class="feature-toggle">
+          <label class="switch">
+            <input type="checkbox" id="deepScanToggle" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      <div class="feature-description">
+        <div id="deepScanStatus" class="description-text">
+          Deep scan extracts detailed product information including ingredients and specifications.
+        </div>
+      </div>
+      <div class="feature-stats">
+        <div id="deep-scan-stats" class="stats-display">Loading...</div>
+      </div>
+    </section>
 
-      <script src="popup.js"></script>
-  </body>
+    <!-- Quick Actions -->
+    <section class="quick-actions-section">
+      <h3 class="section-title">Quick Actions</h3>
+      <div class="actions-grid">
+        <button id="viewData" class="action-btn action-green">
+          <span class="action-text">View Data</span>
+        </button>
+        <button id="clearData" class="action-btn action-red">
+          <span class="action-text">Clear Data</span>
+        </button>
+        <button id="refreshStats" class="action-btn action-gray">
+          <span class="action-text">Refresh</span>
+        </button>
+        <button onclick="openWebsite()" class="action-btn action-green">
+          <span class="action-text">Learn More</span>
+          <small class="action-subtitle">Visit website</small>
+        </button>
+        <button onclick="openLeaderboard()" class="action-btn action-yellow">
+          <span class="action-text">Leaderboard</span>
+          <small class="action-subtitle">View rankings</small>
+        </button>
+      </div>
+    </section>
+
+    <!-- Extension Control -->
+    <section class="control-section">
+      <h3 class="section-title">Extension Control</h3>
+      <button id="toggle-btn" class="toggle-btn toggle-enabled">
+        <span class="toggle-text">Enabled</span>
+      </button>
+      <div class="status-message">
+        <span id="detection-status" class="status-text-small">Monitoring eco-friendly options...</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
 </html>
