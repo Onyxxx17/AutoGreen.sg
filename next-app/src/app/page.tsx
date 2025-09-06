@@ -24,7 +24,7 @@ export default function Page() {
           {/* LEFT: headline + two des */}
           <div className="md:col-span-1 pl-6 md:pl-11">
             <h1 className="text-[clamp(50px,8vw,100px)] leading-tight tracking-tight font-extrabold text-emerald-950">
-              AutoGreen
+              AutoGreen.sg
               <span className="block text-[clamp(20px,5vw,40px)]">Greener by default.</span>
             </h1>
 

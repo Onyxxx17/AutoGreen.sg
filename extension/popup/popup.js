@@ -14,288 +14,36 @@
 document.addEventListener("DOMContentLoaded", async function () {
   console.log("[AutoGreen Popup] Initializing...");
 
-  // Get references to UI elements
-  const deepScanToggle = document.getElementById("deepScanToggle");
-  const deepScanStatus = document.getElementById("deepScanStatus");
-  const deepScanStats = document.getElementById("deep-scan-stats");
-  const basicStats = document.getElementById("basic-stats");
-
-  // Initialize popup
-  await initializePopup();
-
-  // Set up event listeners
-  setupEventListeners();
-
-  // ================================================
-  // 🔧 INITIALIZATION FUNCTIONS
-  // ================================================
-
-  /**
-   * Initialize popup with current settings and stats
-   */
-  async function initializePopup() {
-    try {
-      // Get current tab
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-
-      if (!tab) {
-        showError("Cannot access current tab");
-        return;
-      }
-
-      // Check if extension is active on current page
-      const isValidPage =
-        tab.url && (tab.url.includes("lazada.") || tab.url.includes("foodpanda."));
-
-      if (!isValidPage) {
-        showInactivePage();
-        return;
-      }
-
-      // Load current settings and stats
-      await loadSettings();
-      await loadStats();
-    } catch (error) {
-      console.error("[AutoGreen Popup] Initialization error:", error);
-      showError("Failed to initialize popup");
-    }
-  }
-
-  // ================================================
-  // ⚙️ SETTINGS & STATS LOADING
-  // ================================================
-
-  /**
-   * Load current settings from storage
-   */
-  async function loadSettings() {
-    try {
-      // Get deep scan status from localStorage via content script
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-
-      const result = await chrome.tabs.sendMessage(tab.id, {
-        action: "getDeepScanStatus",
-      });
-
-      if (result && typeof result.enabled === "boolean") {
-        deepScanToggle.checked = result.enabled;
-        updateDeepScanStatus(result.enabled);
-      }
-    } catch (error) {
-      console.error("[AutoGreen Popup] Failed to load settings:", error);
-      deepScanStatus.textContent = "Failed to load settings";
-    }
-  }
-
-  /**
-   * Load current statistics
-   */
-  async function loadStats() {
-    try {
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-
-      // Get basic stats
-      const basicResult = await chrome.tabs.sendMessage(tab.id, {
-        action: "getBasicStats",
-      });
-
-      if (basicResult) {
-        basicStats.innerHTML = `
-          <div>Products Found: ${basicResult.totalProcessed || 0}</div>
-          <div>Currently Processing: ${
-            basicResult.currentlyProcessing ? "Yes" : "No"
-          }</div>
-        `;
-      }
-
-      // Get deep scan stats
-      const deepResult = await chrome.tabs.sendMessage(tab.id, {
-        action: "getDeepScanStats",
-      });
-
-      if (deepResult) {
-        deepScanStats.innerHTML = `
-          <div>Queue Length: ${deepResult.queueLength || 0}</div>
-          <div>Active Scanners: ${deepResult.activeScanners || 0}/${
-          deepResult.maxConcurrent || 3
-        }</div>
-          <div>Scanned Products: ${deepResult.scannedCount || 0}</div>
-        `;
-      }
-    } catch (error) {
-      console.error("[AutoGreen Popup] Failed to load stats:", error);
-      basicStats.textContent = "Failed to load stats";
-      deepScanStats.textContent = "Failed to load deep scan stats";
-    }
-  }
-
-  // ================================================
-  // 🎛️ EVENT LISTENERS & CONTROLS
-  // ================================================
-
-  /**
-   * Set up event listeners
-   */
-  function setupEventListeners() {
-    // Deep scan toggle
-    deepScanToggle.addEventListener("change", async function () {
-      try {
-        const [tab] = await chrome.tabs.query({
-          active: true,
-          currentWindow: true,
-        });
-
-        const result = await chrome.tabs.sendMessage(tab.id, {
-          action: "toggleDeepScan",
-          enabled: this.checked,
-        });
-
-        if (result && result.success) {
-          updateDeepScanStatus(this.checked);
-          await loadStats(); // Refresh stats
-        } else {
-          // Revert toggle if failed
-          this.checked = !this.checked;
-          showError("Failed to toggle deep scan");
-        }
-      } catch (error) {
-        console.error("[AutoGreen Popup] Toggle error:", error);
-        this.checked = !this.checked;
-        showError("Failed to toggle deep scan");
-      }
-    });
-  }
-
-  /**
-   * Update deep scan status text
-   */
-  function updateDeepScanStatus(enabled) {
-    if (enabled) {
-      deepScanStatus.textContent =
-        "✅ Deep scan enabled - Products will be analyzed in detail";
-      deepScanStatus.style.color = "#4CAF50";
-    } else {
-      deepScanStatus.textContent =
-        "❌ Deep scan disabled - Only basic product detection";
-      deepScanStatus.style.color = "#666";
-    }
-  }
-
-  /**
-   * Show error message
-   */
-  function showError(message) {
-    deepScanStatus.textContent = `❌ ${message}`;
-    deepScanStatus.style.color = "#f44336";
-  }
-  /**
-   * Show inactive page message
-   */
-  function showInactivePage() {
-    document.body.innerHTML = `
-      <div style="text-align: center; padding: 20px;">
-        <h2>🛍️ AutoGreen Extension</h2>
-        <p>This extension only works on Lazada and Shopee websites.</p>
-        <p>Please navigate to a supported e-commerce site to use the extension.</p>
-      </div>
-    `;
-  }
+  // Initialize the application
+  await initializeApp();
 });
-/**
- * Application State Management
- */
+
+
+// ================================================
+// 📊 STATE MANAGEMENT
+// ================================================
+
 class AutoGreenState {
-    constructor() {
-      this.extensionEnabled = true;
-      this.userStats = {
-        points: 0,
-        streak: 0,
-        itemsSaved: 0,
-        noCutlery: 0,
-        greenDelivery: 0,
-        paperless: 0,
-        ecoProducts: 0
-      };
-      this.supportedSites = [
-        'grab', 'foodpanda', 'deliveroo', 'lazada', 'shopee', 
-        'redmart', 'fairprice', 'amazon.sg', 'carousell'
-      ];
-    }
-  
-    /**
-     * Update user statistics
-     */
-    updateStats(newStats) {
-      this.userStats = { ...this.userStats, ...newStats };
-      this.saveToStorage();
-      this.updateStatsDisplay();
-    }
-  
-    /**
-     * Save current state to Chrome storage
-     */
-    saveToStorage() {
-      if (this.isChromeExtension()) {
-        try {
-          chrome.storage.sync.set({ 
-            extensionEnabled: this.extensionEnabled,
-            userStats: this.userStats 
-          });
-        } catch (error) {
-          console.error('Failed to save to storage:', error);
-        }
-      }
-    }
-  
-    /**
-     * Load state from Chrome storage
-     */
-    async loadFromStorage() {
-      if (this.isChromeExtension()) {
-        try {
-          const data = await new Promise((resolve, reject) => {
-            chrome.storage.sync.get(['extensionEnabled', 'userStats'], (result) => {
-              if (chrome.runtime.lastError) {
-                reject(chrome.runtime.lastError);
-              } else {
-                resolve(result);
-              }
-            });
-          });
-  
-          this.extensionEnabled = data.extensionEnabled !== false;
-          if (data.userStats) {
-            this.userStats = { ...this.userStats, ...data.userStats };
-          }
+  constructor() {
+    this.extensionEnabled = true;
+    this.deepScanEnabled = false;
+    this.userStats = {
+      points: 0,
+      itemsSaved: 0
+    };
+    this.supportedSites = [
+      'lazada', 'foodpanda'
+    ];
+  }
 
-          // Load eco-friendly statistics
-          await this.loadEcoStats();
-          
-        } catch (error) {
-          console.error('Failed to load from storage:', error);
-          this.loadDemoData();
-        }
-      } else {
-        this.loadDemoData();
-      }
-    }
-
-    /**
-     * Load eco-friendly statistics from local storage
-     */
-    async loadEcoStats() {
+  /**
+   * Load state from Chrome storage
+   */
+  async loadFromStorage() {
+    if (this.isChromeExtension()) {
       try {
-        const ecoData = await new Promise((resolve, reject) => {
-          chrome.storage.local.get(['autogreen_eco_products'], (result) => {
+        const data = await new Promise((resolve, reject) => {
+          chrome.storage.sync.get(['extensionEnabled', 'userStats', 'deepScanEnabled'], (result) => {
             if (chrome.runtime.lastError) {
               reject(chrome.runtime.lastError);
             } else {
@@ -304,342 +52,584 @@ class AutoGreenState {
           });
         });
 
-        if (ecoData.autogreen_eco_products) {
-          const ecoStats = ecoData.autogreen_eco_products;
-          this.userStats.ecoProducts = ecoStats.totalEcoProducts || 0;
-          console.log('Loaded eco-friendly stats:', ecoStats);
+        this.extensionEnabled = data.extensionEnabled !== false;
+        this.deepScanEnabled = data.deepScanEnabled || false;
+        if (data.userStats) {
+          this.userStats = { ...this.userStats, ...data.userStats };
         }
+        
       } catch (error) {
-        console.error('Failed to load eco stats:', error);
+        console.error('Failed to load from storage:', error);
+        this.loadDemoData();
       }
-    }
-  
-    /**
-     * Load demo data for testing
-     */
-    loadDemoData() {
-      this.userStats = {
-        points: 127,
-        streak: 5,
-        itemsSaved: 23,
-        noCutlery: 8,
-        greenDelivery: 4,
-        paperless: 11,
-        ecoProducts: 15
-      };
-    }
-  
-    /**
-     * Check if running as Chrome extension
-     */
-    isChromeExtension() {
-      return typeof chrome !== 'undefined' && chrome.storage && chrome.runtime;
-    }
-  
-    /**
-     * Update the stats display in the UI
-     */
-    updateStatsDisplay() {
-      const statElements = {
-        'user-points': this.userStats.points,
-        'user-streak': this.userStats.streak,
-        'items-saved': this.userStats.itemsSaved,
-        'no-cutlery': this.userStats.noCutlery,
-        'green-delivery': this.userStats.greenDelivery,
-        'paperless': this.userStats.paperless,
-        'eco-products': this.userStats.ecoProducts
-      };
-  
-      Object.entries(statElements).forEach(([id, value]) => {
-        const element = document.getElementById(id);
-        if (element) {
-          // Add animation when value changes
-          if (element.textContent !== value.toString()) {
-            element.style.transform = 'scale(1.1)';
-            setTimeout(() => {
-              element.style.transform = 'scale(1)';
-            }, 200);
-          }
-          element.textContent = value;
-        }
-      });
+    } else {
+      this.loadDemoData();
     }
   }
-  
+
   /**
-   * UI Controller
+   * Save current state to Chrome storage
    */
-  class AutoGreenUI {
-    constructor(state) {
-      this.state = state;
-      this.notificationQueue = [];
-    }
-  
-    /**
-     * Initialize UI components
-     */
-    initialize() {
-      this.updateToggleButton();
-      this.checkCurrentSite();
-      this.setupEventListeners();
-      this.initializeLucideIcons();
-    }
-  
-    /**
-     * Setup all event listeners
-     */
-    setupEventListeners() {
-      if (this.state.isChromeExtension()) {
-        chrome.runtime.onMessage.addListener((message) => {
-          this.handleExtensionMessage(message);
-        });
-      }
-    }
-  
-    /**
-     * Handle messages from extension
-     */
-    handleExtensionMessage(message) {
-      switch (message.action) {
-        case 'updateStats':
-          this.state.loadFromStorage();
-          break;
-        case 'ecoActionDetected':
-          this.showNotification('🌱 Eco option auto-selected!', 'success');
-          break;
-        default:
-          console.warn('Unknown message action:', message.action);
-      }
-    }
-  
-    /**
-     * Check if current site is supported
-     */
-    async checkCurrentSite() {
-      if (!this.state.isChromeExtension()) {
-        this.updateSiteStatus(true);
-        return;
-      }
-  
+  saveToStorage() {
+    if (this.isChromeExtension()) {
       try {
-        const tabs = await new Promise((resolve, reject) => {
-          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (chrome.runtime.lastError) {
-              reject(chrome.runtime.lastError);
-            } else {
-              resolve(tabs);
-            }
-          });
+        chrome.storage.sync.set({ 
+          extensionEnabled: this.extensionEnabled,
+          deepScanEnabled: this.deepScanEnabled,
+          userStats: this.userStats 
         });
-  
-        if (tabs[0]) {
-          const isSupported = this.state.supportedSites.some(site => 
-            tabs[0].url.includes(site)
-          );
-          this.updateSiteStatus(isSupported);
-        }
       } catch (error) {
-        console.error('Failed to check current site:', error);
-        this.updateSiteStatus(false);
+        console.error('Failed to save to storage:', error);
       }
     }
-  
-    /**
-     * Update site status indicator
-     */
-    updateSiteStatus(isSupported) {
-      const statusDot = document.getElementById('status-dot');
-      const statusText = document.getElementById('status-text');
-      const detectionStatus = document.getElementById('detection-status');
-  
+  }
+
+  /**
+   * Load demo data for testing
+   */
+  loadDemoData() {
+    this.userStats = {
+      points: 127,
+      itemsSaved: 23
+    };
+  }
+
+  /**
+   * Check if running as Chrome extension
+   */
+  isChromeExtension() {
+    return typeof chrome !== 'undefined' && chrome.storage && chrome.runtime;
+  }
+
+  /**
+   * Update the stats display in the UI
+   */
+  updateStatsDisplay() {
+    const pointsEl = document.getElementById('user-points');
+    const itemsEl = document.getElementById('items-saved');
+
+    if (pointsEl) pointsEl.textContent = this.userStats.points;
+    if (itemsEl) itemsEl.textContent = this.userStats.itemsSaved;
+  }
+}
+
+// ================================================
+// 🎮 UI CONTROLLER
+// ================================================
+
+class AutoGreenUI {
+  constructor(state) {
+    this.state = state;
+  }
+
+  /**
+   * Initialize UI components
+   */
+  async initialize() {
+    await this.checkCurrentSite();
+    this.updateToggleButton();
+    this.setupEventListeners();
+    await this.loadStats();
+    await this.loadSettings();
+  }
+
+  /**
+   * Check if current site is supported
+   */
+
+  async checkCurrentSite() {
+    if (!this.state.isChromeExtension()) {
+      this.updateSiteStatus(true);
+      return;
+
+    }
+
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      if (tab) {
+        const isSupported = this.state.supportedSites.some(site => 
+          tab.url && tab.url.includes(site)
+        );
+        this.updateSiteStatus(isSupported);
+        
+        if (!isSupported) {
+          this.showInactivePage();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check current site:', error);
+      this.updateSiteStatus(false);
+    }
+  }
+
+  /**
+   * Update site status
+   */
+  updateSiteStatus(isSupported) {
+    const detectionStatus = document.getElementById('detection-status');
+    
+    if (detectionStatus) {
       if (isSupported) {
-        statusDot.className = 'status-dot status-active';
-        statusText.textContent = 'Active';
-        statusText.className = 'status-text';
         detectionStatus.textContent = 'Monitoring eco-friendly options...';
       } else {
-        statusDot.className = 'status-dot status-standby';
-        statusText.textContent = 'Standby';
-        statusText.className = 'status-text';
-        statusText.style.color = 'var(--color-yellow-600)';
-        detectionStatus.textContent = 'Visit supported sites for eco tracking';
-      }
-    }
-  
-    /**
-     * Toggle extension on/off
-     */
-    toggleExtension() {
-      this.state.extensionEnabled = !this.state.extensionEnabled;
-      this.state.saveToStorage();
-  
-      if (this.state.isChromeExtension()) {
-        this.sendMessageToContentScript({
-          action: 'toggleExtension',
-          enabled: this.state.extensionEnabled
-        });
-      }
-  
-      this.updateToggleButton();
-      this.showNotification(
-        this.state.extensionEnabled ? 'Extension enabled!' : 'Extension paused',
-        this.state.extensionEnabled ? 'success' : 'info'
-      );
-    }
-  
-    /**
-     * Update toggle button appearance
-     */
-    updateToggleButton() {
-      const btn = document.getElementById('toggle-btn');
-      if (this.state.extensionEnabled) {
-        btn.innerHTML = '<i data-lucide="power" class="icon-small"></i><span>Extension Enabled</span>';
-        btn.className = 'toggle-btn toggle-enabled';
-      } else {
-        btn.innerHTML = '<i data-lucide="pause" class="icon-small"></i><span>Extension Paused</span>';
-        btn.className = 'toggle-btn toggle-disabled';
-      }
-      this.initializeLucideIcons();
-    }
-  
-    /**
-     * Open URL in new tab
-     */
-    openUrl(url) {
-      if (this.state.isChromeExtension()) {
-        try {
-          chrome.tabs.create({ url });
-          window.close();
-        } catch (error) {
-          console.error('Failed to open URL:', error);
-          // Fallback to window.open
-          window.open(url, '_blank');
-        }
-      } else {
-        window.open(url, '_blank');
-      }
-    }
-  
-    /**
-     * Show notification to user
-     */
-    showNotification(message, type = 'info') {
-      const notification = this.createNotificationElement(message, type);
-      const container = document.getElementById('notifications');
-      
-      container.appendChild(notification);
-  
-      // Auto-remove after 3 seconds
-      setTimeout(() => {
-        this.removeNotification(notification);
-      }, 3000);
-    }
-  
-    /**
-     * Create notification element
-     */
-    createNotificationElement(message, type) {
-      const notification = document.createElement('div');
-      notification.className = `notification notification-${type}`;
-      notification.textContent = message;
-      return notification;
-    }
-  
-    /**
-     * Remove notification with animation
-     */
-    removeNotification(notification) {
-      if (notification.parentNode) {
-        notification.style.animation = 'slideOutUp 0.3s ease-in forwards';
-        setTimeout(() => {
-          if (notification.parentNode) {
-            notification.remove();
-          }
-        }, 300);
-      }
-    }
-  
-    /**
-     * Send message to content script
-     */
-    sendMessageToContentScript(message) {
-      if (this.state.isChromeExtension()) {
-        try {
-          chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs[0]) {
-              chrome.tabs.sendMessage(tabs[0].id, message);
-            }
-          });
-        } catch (error) {
-          console.error('Failed to send message to content script:', error);
-        }
-      }
-    }
-  
-    /**
-     * Initialize Lucide icons
-     */
-    initializeLucideIcons() {
-      setTimeout(() => {
-        if (typeof lucide !== 'undefined') {
-          lucide.createIcons();
-        }
-      }, 100);
-    }
-  }
-  
-  /**
-   * Application Controller
-   */
-  class AutoGreenApp {
-    constructor() {
-      this.state = new AutoGreenState();
-      this.ui = new AutoGreenUI(this.state);
-    }
-  
-    /**
-     * Initialize the application
-     */
-    async initialize() {
-      try {
-        await this.state.loadFromStorage();
-        this.state.updateStatsDisplay();
-        this.ui.initialize();
-      } catch (error) {
-        console.error('Failed to initialize app:', error);
-        // Still initialize UI with default values
-        this.ui.initialize();
+        detectionStatus.textContent = 'Navigate to Lazada or FoodPanda to activate';
       }
     }
   }
-  
-  // Global app instance
-  let app;
-  
+
   /**
-   * Initialize popup when DOM is loaded
+   * Setup all event listeners
    */
-  document.addEventListener('DOMContentLoaded', async () => {
+  setupEventListeners() {
+    // Deep scan toggle
+    const deepScanToggle = document.getElementById('deepScanToggle');
+    if (deepScanToggle) {
+      deepScanToggle.addEventListener('change', async (e) => {
+        await this.toggleDeepScan(e.target.checked);
+      });
+    }
+
+    // Main extension toggle
+    const toggleBtn = document.getElementById('toggle-btn');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        this.toggleExtension();
+      });
+    }
+
+
+    // Quick action buttons
+    const viewDataBtn = document.getElementById('viewData');
+    const clearDataBtn = document.getElementById('clearData');
+    const refreshStatsBtn = document.getElementById('refreshStats');
+
+    if (viewDataBtn) {
+      viewDataBtn.addEventListener('click', () => this.exportData());
+    }
+
+    if (clearDataBtn) {
+      clearDataBtn.addEventListener('click', () => this.clearData());
+    }
+
+    if (refreshStatsBtn) {
+      refreshStatsBtn.addEventListener('click', () => this.refreshStats());
+    }
+  }
+
+  /**
+   * Load current settings
+   */
+  async loadSettings() {
     try {
-      app = new AutoGreenApp();
-      await app.initialize();
+      if (this.state.isChromeExtension()) {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        if (tab && tab.url && this.state.supportedSites.some(site => tab.url.includes(site))) {
+          const result = await chrome.tabs.sendMessage(tab.id, {
+            action: "getDeepScanStatus",
+          });
+
+          if (result && typeof result.enabled === "boolean") {
+            this.state.deepScanEnabled = result.enabled;
+            const deepScanToggle = document.getElementById('deepScanToggle');
+            if (deepScanToggle) {
+              deepScanToggle.checked = result.enabled;
+            }
+            this.updateDeepScanStatus(result.enabled);
+          }
+        }
+
+      }
+      
+      // Update toggle from stored state
+      const deepScanToggle = document.getElementById('deepScanToggle');
+      if (deepScanToggle) {
+        deepScanToggle.checked = this.state.deepScanEnabled;
+      }
+      this.updateDeepScanStatus(this.state.deepScanEnabled);
+      
     } catch (error) {
-      console.error('Failed to start AutoGreen popup:', error);
+      console.error('Failed to load settings:', error);
+      this.showStatus('Failed to load settings', 'error');
     }
-  });
-  
+  }
+
   /**
-   * Global functions for button onclick handlers
-   * These need to remain global for the HTML onclick attributes
+   * Load current statistics
    */
-  function toggleExtension() {
-    if (app && app.ui) {
-      app.ui.toggleExtension();
+  async loadStats() {
+    try {
+      if (this.state.isChromeExtension()) {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        if (tab && tab.url && this.state.supportedSites.some(site => tab.url.includes(site))) {
+          // Get basic stats
+          const basicResult = await chrome.tabs.sendMessage(tab.id, {
+            action: "getBasicStats",
+          });
+
+          if (basicResult) {
+            const basicStats = document.getElementById('basic-stats');
+            if (basicStats) {
+              basicStats.innerHTML = `
+                <div>Products Found: ${basicResult.totalProcessed || 0}</div>
+                <div>Currently Processing: ${basicResult.currentlyProcessing ? "Yes" : "No"}</div>
+              `;
+            }
+          }
+
+          // Get deep scan stats
+          const deepResult = await chrome.tabs.sendMessage(tab.id, {
+            action: "getDeepScanStats",
+          });
+
+          if (deepResult) {
+            const deepStats = document.getElementById('deep-scan-stats');
+            if (deepStats) {
+              deepStats.innerHTML = `
+                <div>Queue Length: ${deepResult.queueLength || 0}</div>
+                <div>Active Scanners: ${deepResult.activeScanners || 0}/${deepResult.maxConcurrent || 3}</div>
+                <div>Scanned Products: ${deepResult.scannedCount || 0}</div>
+              `;
+            }
+          }
+        }
+      }
+      
+      // Set default stats if no content script response
+      const basicStats = document.getElementById('basic-stats');
+      const deepStats = document.getElementById('deep-scan-stats');
+      
+      if (basicStats && basicStats.textContent === 'Loading...') {
+        basicStats.innerHTML = `
+          <div>Products Found: 0</div>
+          <div>Currently Processing: No</div>
+        `;
+      }
+      
+      if (deepStats && deepStats.textContent === 'Loading...') {
+        deepStats.innerHTML = `
+          <div>Queue Length: 0</div>
+          <div>Active Scanners: 0/3</div>
+          <div>Scanned Products: 0</div>
+        `;
+      }
+      
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+      const basicStats = document.getElementById('basic-stats');
+      const deepStats = document.getElementById('deep-scan-stats');
+      
+      if (basicStats) basicStats.textContent = 'Stats unavailable';
+      if (deepStats) deepStats.textContent = 'Deep scan stats unavailable';
+    }
+
+//         if (result && result.success) {
+//           updateDeepScanStatus(this.checked);
+//           await loadStats(); // Refresh stats
+//         } else {
+//           // Revert toggle if failed
+//           this.checked = !this.checked;
+//           showError("Failed to toggle deep scan");
+//         }
+//       } catch (error) {
+//         console.error("[AutoGreen Popup] Toggle error:", error);
+//         this.checked = !this.checked;
+//         showError("Failed to toggle deep scan");
+//       }
+//     });
+
+  }
+
+  /**
+   * Toggle deep scan mode
+   */
+  async toggleDeepScan(enabled) {
+    try {
+      this.state.deepScanEnabled = enabled;
+      this.state.saveToStorage();
+      
+      if (this.state.isChromeExtension()) {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        if (tab && tab.url && this.state.supportedSites.some(site => tab.url.includes(site))) {
+          const result = await chrome.tabs.sendMessage(tab.id, {
+            action: "toggleDeepScan",
+            enabled: enabled,
+          });
+
+          if (result && result.success) {
+            this.updateDeepScanStatus(enabled);
+            await this.loadStats();
+            return;
+          }
+        }
+      }
+      
+      // Update UI even if no content script
+      this.updateDeepScanStatus(enabled);
+      
+    } catch (error) {
+      console.error('Toggle deep scan error:', error);
+      // Revert toggle
+      const deepScanToggle = document.getElementById('deepScanToggle');
+      if (deepScanToggle) {
+        deepScanToggle.checked = !enabled;
+      }
+      this.showStatus('Failed to toggle deep scan', 'error');
     }
   }
-  
-  function openSettings() {
-    if (app && app.ui) {
-      app.ui.openUrl('https://autogreen-sg.vercel.app/settings');
+
+  /**
+   * Toggle main extension
+   */
+  toggleExtension() {
+    this.state.extensionEnabled = !this.state.extensionEnabled;
+    this.state.saveToStorage();
+    this.updateToggleButton();
+    
+    this.showStatus(
+      this.state.extensionEnabled ? 'Extension enabled!' : 'Extension disabled',
+      this.state.extensionEnabled ? 'success' : 'info'
+    );
+  }
+
+  /**
+   * Update toggle button appearance
+   */
+  updateToggleButton() {
+    const btn = document.getElementById('toggle-btn');
+    if (!btn) return;
+
+    if (this.state.extensionEnabled) {
+      btn.innerHTML = '<span class="toggle-icon">●</span><span class="toggle-text">Enabled</span>';
+      btn.className = 'toggle-btn toggle-enabled';
+    } else {
+      btn.innerHTML = '<span class="toggle-icon">○</span><span class="toggle-text">Disabled</span>';
+      btn.className = 'toggle-btn toggle-disabled';
     }
   }
+
+  /**
+   * Update deep scan status text
+   */
+  updateDeepScanStatus(enabled) {
+    const deepScanStatus = document.getElementById('deepScanStatus');
+    if (!deepScanStatus) return;
+
+    if (enabled) {
+      deepScanStatus.textContent = "Deep scan enabled - Products will be analyzed in detail";
+      deepScanStatus.style.color = "#22c55e";
+    } else {
+      deepScanStatus.textContent = "Deep scan disabled - Only basic product detection";
+      deepScanStatus.style.color = "#666";
+    }
+  }
+
+  /**
+   * Export data functionality
+   */
+  async exportData() {
+    try {
+      let dataToExport = {
+        userStats: this.state.userStats,
+        extensionEnabled: this.state.extensionEnabled,
+        deepScanEnabled: this.state.deepScanEnabled,
+        exportDate: new Date().toISOString()
+      };
+
+      if (this.state.isChromeExtension()) {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        if (tab && tab.url && this.state.supportedSites.some(site => tab.url.includes(site))) {
+          const result = await chrome.tabs.sendMessage(tab.id, {
+            action: "exportData",
+          });
+
+          if (result && result.data) {
+            dataToExport = { ...dataToExport, ...result.data };
+          }
+        }
+      }
+
+      // Create and download file
+      const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
+        type: "application/json",
+      });
+      const url = URL.createObjectURL(blob);
+
+      if (this.state.isChromeExtension()) {
+        await chrome.downloads.download({
+          url: url,
+          filename: `autogreen-data-${new Date().toISOString().split("T")[0]}.json`,
+        });
+      } else {
+        // Fallback for non-extension environment
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `autogreen-data-${new Date().toISOString().split("T")[0]}.json`;
+        a.click();
+      }
+
+      this.showStatus("Data exported successfully", "success");
+      
+    } catch (error) {
+      console.error('Export error:', error);
+      this.showStatus("Failed to export data", "error");
+    }
+  }
+
+  /**
+   * Clear all data
+   */
+  async clearData() {
+    if (!confirm("Are you sure you want to clear all data? This cannot be undone.")) {
+      return;
+    }
+
+    try {
+      // Reset local state
+      this.state.userStats = { points: 0, itemsSaved: 0 };
+      this.state.updateStatsDisplay();
+      this.state.saveToStorage();
+
+      if (this.state.isChromeExtension()) {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        
+        if (tab && tab.url && this.state.supportedSites.some(site => tab.url.includes(site))) {
+          const result = await chrome.tabs.sendMessage(tab.id, {
+            action: "clearAllData",
+          });
+        }
+      }
+
+      await this.loadStats();
+      this.showStatus("All data cleared", "success");
+      
+    } catch (error) {
+      console.error('Clear data error:', error);
+      this.showStatus("Failed to clear data", "error");
+    }
+  }
+
+  /**
+   * Refresh statistics
+   */
+  async refreshStats() {
+    await this.loadStats();
+    this.showStatus("Stats refreshed", "success");
+  }
+
+  /**
+   * Show status message
+   */
+  showStatus(message, type = 'info') {
+    const deepScanStatus = document.getElementById('deepScanStatus');
+    if (!deepScanStatus) return;
+
+    const originalText = deepScanStatus.textContent;
+    const originalColor = deepScanStatus.style.color;
+
+    const colors = {
+      success: '#22c55e',
+      error: '#ef4444',
+      info: '#3b82f6'
+    };
+
+    const icons = {
+      success: '✅',
+      error: '❌',
+      info: 'ℹ️'
+    };
+
+    deepScanStatus.textContent = `${icons[type]} ${message}`;
+    deepScanStatus.style.color = colors[type];
+
+    setTimeout(() => {
+      deepScanStatus.textContent = originalText;
+      deepScanStatus.style.color = originalColor;
+    }, 2000);
+  }
+
+  /**
+   * Show inactive page message
+   */
+  showInactivePage() {
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.innerHTML = `
+        <div style="text-align: center; padding: 20px; color: var(--color-gray-600);">
+          <h2 style="color: var(--color-primary); margin-bottom: 16px;">🌿 AutoGreen Extension</h2>
+          <p style="margin-bottom: 8px;">This extension works on Lazada and FoodPanda websites.</p>
+          <p>Navigate to a supported site to use the extension.</p>
+        </div>
+      `;
+    }
+  }
+
+}
+
+// ================================================
+// 🎯 APPLICATION CONTROLLER
+// ================================================
+
+class AutoGreenApp {
+  constructor() {
+    this.state = new AutoGreenState();
+    this.ui = new AutoGreenUI(this.state);
+  }
+
+  /**
+   * Initialize the application
+   */
+  async initialize() {
+    try {
+      await this.state.loadFromStorage();
+      this.state.updateStatsDisplay();
+      await this.ui.initialize();
+    } catch (error) {
+      console.error('Failed to initialize app:', error);
+      await this.ui.initialize();
+    }
+  }
+}
+
+// ================================================
+// 🌍 GLOBAL FUNCTIONS & INITIALIZATION
+// ================================================
+
+let app;
+
+/**
+ * Initialize the application
+ */
+async function initializeApp() {
+  try {
+    app = new AutoGreenApp();
+    await app.initialize();
+  } catch (error) {
+    console.error('Failed to start AutoGreen popup:', error);
+  }
+}
+
+/**
+ * Global functions for HTML onclick handlers
+ */
+function openWebsite() {
+  if (typeof chrome !== 'undefined' && chrome.tabs) {
+    chrome.tabs.create({ url: 'https://autogreen-sg.vercel.app' });
+    window.close();
+  } else {
+    window.open('https://autogreen-sg.vercel.app', '_blank');
+  }
+}
+
+function openLeaderboard() {
+  if (typeof chrome !== 'undefined' && chrome.tabs) {
+    chrome.tabs.create({ url: 'https://autogreen-sg.vercel.app/leaderboard' });
+    window.close();
+  } else {
+    window.open('https://autogreen-sg.vercel.app/leaderboard', '_blank');
+  }
+}

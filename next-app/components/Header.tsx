@@ -53,7 +53,7 @@ export default function Header() {
             <div className="flex h-18 w-screen items-center justify-between px-8">
                 <Link href="/" className="flex items-center gap-4">
                     <Image
-                        src="/logo.png"
+                        src="/autogreen.png"
                         alt="AutoGreen"
                         width={40}
                         height={40}
@@ -62,7 +62,7 @@ export default function Header() {
                     />
                     <span className="text-xl font-extrabold tracking-tight">
                         <span className="text-black text-2xl">Auto</span>
-                        <span className="font-light text-emerald-950 text-2xl"> Green</span>
+                        <span className="font-light text-emerald-950 text-2xl">Green.sg</span>
                     </span>
                 </Link>
 
