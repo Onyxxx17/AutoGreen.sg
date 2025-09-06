@@ -23,7 +23,7 @@ Built for Singapore's Green Plan 2030 pillars:
 AutoGreen.sg/
 ├── extension/          # Chrome Extension for product scanning
 ├── next-app/          # Next.js web application
-├── API_TEST_README.md  # API testing documentation
+├── README.md          # README documentation
 └── request.rest       # REST API testing file
 ```
 
