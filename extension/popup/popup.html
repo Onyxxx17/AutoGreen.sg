@@ -4,178 +4,104 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>AutoGreen.sg</title>
-
     <link rel="stylesheet" href="popup.css" />
   </head>
+
   <body>
-    <h1>🛍️ AutoGreen Extension</h1>
-
-    <div class="section">
-      <h3>Product Detection</h3>
-      <div id="basic-stats" class="stats">Loading...</div>
-    </div>
-
-    <div class="section">
-      <h3>Deep Scan Settings</h3>
-      <div class="toggle-container">
-        <span>Enable Deep Scan</span>
-        <label class="switch">
-          <input type="checkbox" id="deepScanToggle" />
-          <span class="slider"></span>
-        </label>
-      </div>
-      <div id="deepScanStatus" class="status-text">
-        Deep scan extracts detailed product information including ingredients
-        and specifications.
-      </div>
-      <div id="deep-scan-stats" class="stats">Loading...</div>
-    </div>
-
-    <div class="section">
-      <h3>Actions</h3>
-      <button id="viewData" class="button">View Data</button>
-      <button id="clearData" class="button danger">Clear Data</button>
-      <button id="refreshStats" class="button">Refresh</button>
-    </div>
-
-    <body>
-  <!-- Header -->
-  <header class="header">
-    <div class="header-bg"></div>
-    <div class="header-content">
-      <div class="brand-section">
-        <img src="../autogreen.png" alt="AutoGreen Logo" class="logo">
-        <div class="brand-info">
-          <h1 class="brand-title">AutoGreen.sg</h1>
-          <p class="brand-subtitle">Sustainable Shopping</p>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-bg"></div>
+      <div class="header-content">
+        <div class="brand-section">
+          <img src="../autogreen.png" alt="AutoGreen Logo" class="logo">
+          <div class="brand-info">
+            <h1 class="brand-title">AutoGreen.sg</h1>
+            <p class="brand-subtitle">Intelligent Product Scanner</p>
+          </div>
         </div>
       </div>
-      
-      <div class="status-indicator">
-        <div id="status-dot" class="status-dot status-active"></div>
-        <span id="status-text" class="status-text">Active</span>
-      </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <!-- User Impact Section -->
-    <section class="impact-section">
-      <div class="section-header">
-        <h2 class="section-title">Your Impact</h2>
-        <div class="streak-badge">
-          <span id="user-streak">0</span> day streak
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Impact Section -->
+      <section class="impact-section">
+        <div class="section-header">
+          <h2 class="section-title">Your Impact</h2>
         </div>
-      </div>
-      
-      <!-- Main Stats Cards -->
-      <div class="stats-grid">
-        <div class="stat-card stat-card-green">
-          <div class="card-decoration"></div>
-          <div class="card-content">
-            <div class="card-header">
-              <span class="card-label">Green Points</span>
+        <div class="stats-grid">
+          <div class="stat-card stat-card-green">
+            <div class="card-decoration"></div>
+            <div class="card-content">
+              <div class="card-header">
+                <span class="card-label">Green Points</span>
+              </div>
+              <div id="user-points" class="card-value">0</div>
             </div>
-            <div id="user-points" class="card-value">0</div>
           </div>
-        </div>
-        
-        <div class="stat-card stat-card-blue">
-          <div class="card-decoration"></div>
-          <div class="card-content">
-            <div class="card-header">
-              <span class="card-label">Items Saved</span>
+          <div class="stat-card stat-card-blue">
+            <div class="card-decoration"></div>
+            <div class="card-content">
+              <div class="card-header">
+                <span class="card-label">Items Saved</span>
+              </div>
+              <div id="items-saved" class="card-value">0</div>
             </div>
-            <div id="items-saved" class="card-value">0</div>
           </div>
         </div>
-      </div>
-
-      <!-- Detailed Stats -->
-      <div class="detailed-stats">
-        <div class="mini-stat">
-          <div id="no-cutlery" class="mini-stat-value stat-green">0</div>
-          <div class="mini-stat-label">No Cutlery</div>
-        </div>
-        <div class="mini-stat">
-          <div id="green-delivery" class="mini-stat-value stat-blue">0</div>
-          <div class="mini-stat-label">Green Delivery</div>
-        </div>
-        <div class="mini-stat">
-          <div id="paperless" class="mini-stat-value stat-purple">0</div>
-          <div class="mini-stat-label">Paperless</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Quick Actions -->
-    <section class="actions-section">
-      <h3 class="section-subtitle">Quick Actions</h3>
-      
-      <div class="actions-grid">
-        <button onclick="openWebsite()" class="action-btn action-btn-green">
-
-          <div class="action-content">
-            <div class="action-title">Learn More</div>
-            <div class="action-subtitle">Visit website</div>
-          </div>
-        </button>
+      </section>
         
-        <button onclick="openLeaderboard()" class="action-btn action-btn-yellow">
-          <div class="action-content">
-            <div class="action-title">Leaderboard</div>
-            <div class="action-subtitle">View rankings</div>
-          </div>
-        </button>
-      </div>
-      
-      <div class="button-row">
-        <button onclick="showEcoTip()" class="primary-btn">
-          <span>Eco Tips</span>
-        </button>
-        
-        <button onclick="openSettings()" class="secondary-btn">
-          <span>Settings</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- Extension Control -->
-    <section class="control-section">
-      <div class="control-header">
-        <div class="control-title-wrapper">
-          <span class="control-title">Extension Control</span>
+        <!-- Product Detection -->
+        <div class="section">
+          <h3>Product Detection</h3>
+          <div id="basic-stats" class="stats">Loading...</div>
         </div>
-      </div>
-      
-      <button onclick="toggleExtension()" id="toggle-btn" class="toggle-btn toggle-enabled">
-        <span>Extension Enabled</span>
-      </button>
-      
-      <div class="status-message">
-        <span id="detection-status" class="status-text-small">Monitoring eco-friendly options...</span>
-      </div>
-    </section>
-  </main>
+        
+        <!-- Deep Scan Settings -->
+        <div class="section">
+          <h3>Deep Scan Settings</h3>
+          <div class="toggle-container">
+            <span>Enable Deep Scan</span>
+            <label class="switch">
+              <input type="checkbox" id="deepScanToggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="deepScanStatus" class="status-text">
+            Deep scan extracts detailed product information including ingredients
+            and specifications.
+          </div>
+          <div id="deep-scan-stats" class="stats">Loading...</div>
+        </div>
 
-  <!-- Eco Tip Modal -->
-  <div id="eco-tip-modal" class="modal-overlay hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Eco Tip</h3>
-      </div>
-      <p id="tip-content" class="modal-text"></p>
-      <button onclick="closeEcoTip()" class="modal-btn">
-        Got it!
-      </button>
-    </div>
-  </div>
+      </section>
 
-  <!-- Notification Container -->
-  <div id="notifications" class="notification-container"></div>
+      <!-- Quick Actions -->
+      <section class="quick-actions-section">
+        <h3>Quick Actions</h3>
+        <div class="actions-grid">
+          <button id="viewData" class="action-btn action-green">View Data</button>
+          <button id="clearData" class="action-btn action-red">Clear Data</button>
+          <button id="refreshStats" class="action-btn action-gray">Refresh</button>
+          <button onclick="openWebsite()" class="action-btn action-green">
+            Learn More<br><small>Visit website</small>
+          </button>
+          <button onclick="openLeaderboard()" class="action-btn action-yellow">
+            Leaderboard<br><small>View rankings</small>
+          </button>
+        </div>
+      </section>
 
+      <!-- Extension Control -->
+      <section class="control-section">
+        <h3>Extension Control</h3>
+        <button id="toggle-btn" class="toggle-btn toggle-enabled">Enabled</button>
+        <div class="status-message">
+          <span id="detection-status" class="status-text-small">Monitoring eco-friendly options...</span>
+        </div>
+      </section>
+    </main>
 
-    <script src="popup.js"></script>
+      <script src="popup.js"></script>
   </body>
 </html>
