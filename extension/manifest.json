@@ -69,8 +69,8 @@
   ],
   
   "icons": {
-    "16": "hello_extensions.png",
-    "48": "hello_extensions.png",
-    "128": "hello_extensions.png"
+    "16": "autogreen.png",
+    "48": "autogreen.png",
+    "128": "autogreen.png"
   }
 }
