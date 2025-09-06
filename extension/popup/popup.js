@@ -136,10 +136,12 @@ class AutoGreenUI {
   /**
    * Check if current site is supported
    */
+
   async checkCurrentSite() {
     if (!this.state.isChromeExtension()) {
       this.updateSiteStatus(true);
       return;
+
     }
 
     try {
@@ -237,6 +239,7 @@ class AutoGreenUI {
             this.updateDeepScanStatus(result.enabled);
           }
         }
+
       }
       
       // Update toggle from stored state
@@ -416,10 +419,10 @@ class AutoGreenUI {
     if (!deepScanStatus) return;
 
     if (enabled) {
-      deepScanStatus.textContent = "✅ Deep scan enabled - Products will be analyzed in detail";
+      deepScanStatus.textContent = "Deep scan enabled - Products will be analyzed in detail";
       deepScanStatus.style.color = "#22c55e";
     } else {
-      deepScanStatus.textContent = "❌ Deep scan disabled - Only basic product detection";
+      deepScanStatus.textContent = "Deep scan disabled - Only basic product detection";
       deepScanStatus.style.color = "#666";
     }
   }
@@ -564,6 +567,7 @@ class AutoGreenUI {
       `;
     }
   }
+
 }
 
 // ================================================
