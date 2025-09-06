@@ -4,9 +4,6 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { locationFromSector, normalizeSector } from "../lib/sg-sectors";
 
-const sectorLabel = (s: string) =>
-  locationFromSector(s) ?? `Sector ${normalizeSector(s)}`;
-
 
 /* ---------------- Rank chip (🏆/🥈/🥉) ---------------- */
 function RankChip({ rank }: { rank: number }) {
@@ -31,7 +28,8 @@ function RankChip({ rank }: { rank: number }) {
 
 /* ---------------- Types & helpers ---------------- */
 type ApiRow = {
-  sector: string;
+  sector?: string;
+  sector_code?: string;
   total_points: number | string;
   user_count: number | string;
 };
@@ -82,7 +80,7 @@ export default function Leaderboard() {
     if (!rows) return null;
 
     const normalized = rows.map((r) => {
-      const secRaw = (r.sector ?? (r as any).sector_code ?? "00") as string;
+      const secRaw = (r.sector ?? r.sector_code ?? "00") as string;
       const sec = normalizeSector(secRaw);
       return {
         sector: sec,
@@ -151,7 +149,7 @@ export default function Leaderboard() {
             const rank = i + 1;
             const delay = `${i * 90}ms`;
             const isPodium = rank <= 3;
-            const sectorName = locationFromSector(r.sector) ?? regionFromSector(r.sector);
+            const sectorName = locationFromSector(r.sector) ?? `Sector ${normalizeSector(r.sector)}`;
 
             return (
               <div
@@ -173,7 +171,7 @@ export default function Leaderboard() {
                   </div>
                   <div className="col-span-2 text-emerald-950 font-medium">{r.sector}</div>
                   <div className="col-span-4 truncate text-emerald-900/90">
-                    {sectorLabel(r.sector)}
+                    {sectorName}
                   </div>                  <div className="col-span-2 text-right text-emerald-950 tabular-nums font-semibold">
                     {Number(r.total_points).toLocaleString()}
                   </div>
