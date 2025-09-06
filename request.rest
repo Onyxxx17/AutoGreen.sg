@@ -1,0 +1,138 @@
+### AutoGreen.sg API Testing
+### Base URL: https://autogreen-sg.vercel.app
+###
+# ==============================================
+# 1. USERS API - POST /api/users
+# ==============================================
+
+### Test 1: Create/Update User Points (Valid Request)
+POST https://autogreen-sg.vercel.app/api/users
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440005",
+  "sectorCode": "12",
+  "points": 15
+}
+
+### Test 2: Create/Update User Points (Different User)
+POST https://autogreen-sg.vercel.app/api/users
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440001",
+  "sectorCode": "15",
+  "points": 20
+}
+
+### Test 3: Update Existing User (Additional Points)
+POST https://autogreen-sg.vercel.app/api/users
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "sectorCode": "12",
+  "points": 5
+}
+
+### Test 4: No Cutlery Action (+1 point)
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440002",
+  "sectorCode": "21",
+  "points": 1
+}
+
+### Test 5: Green Delivery Action (+2 points)
+POST https://autogreen-sg.vercel.app/api/users
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440002",
+  "sectorCode": "21",
+  "points": 2
+}
+
+### Test 6: Paperless Receipt (+1 point)
+POST https://autogreen-sg.vercel.app/api/users
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440002",
+  "sectorCode": "21",
+  "points": 1
+}
+
+### Test 7: Eco-Friendly Product Purchase (+3 points)
+POST https://autogreen-sg.vercel.app/api/users
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440002",
+  "sectorCode": "21",
+  "points": 3
+}
+
+### Test 8: Error Test - Missing userId
+POST https://autogreen-sg.vercel.app/api/users
+Content-Type: application/json
+
+{
+  "sectorCode": "12",
+  "points": 10
+}
+
+### Test 9: Error Test - Missing sectorCode
+POST https://autogreen-sg.vercel.app/api/users
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "points": 10
+}
+
+### Test 10: Error Test - Missing points
+POST https://autogreen-sg.vercel.app/api/users
+Content-Type: application/json
+
+{
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "sectorCode": "12"
+}
+
+
+### Test 11: Error Test - Empty body
+POST http://localhost:3000/api/users
+Content-Type: application/json
+
+# ==============================================
+# 2. LEADERBOARD API - GET /api/leaderboard
+# ==============================================
+
+### Test 12: Get Leaderboard
+GET https://autogreen-sg.vercel.app/api/leaderboard
+
+### Test 13: Get Leaderboard with Accept header
+GET https://autogreen-sg.vercel.app/api/leaderboard
+Accept: application/json
+
+# ==============================================
+# 3. USER STATS API - GET /api/users/[id]/stats
+# ==============================================
+
+### Test 14: Get User Stats (Valid User)
+GET https://autogreen-sg.vercel.app/api/users/550e8400-e29b-41d4-a716-446655440000/stats
+
+### Test 15: Get User Stats (Different User)
+GET https://autogreen-sg.vercel.app0/api/users/550e8400-e29b-41d4-a716-446655440001/stats
+
+### Test 16: Get User Stats 
+GET https://autogreen-sg.vercel.app/api/users/550e8400-e29b-41d4-a716-446655440002/stats
+
+### Test 17: Error Test - User Not Found
+GET http://localhost:3000/api/users/nonexistent-user-id/stats
+
+### Test 18: Error Test - Empty User ID
+GET http://localhost:3000/api/users//stats

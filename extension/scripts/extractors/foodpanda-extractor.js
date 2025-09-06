@@ -305,6 +305,23 @@ class AutoGreenFoodPandaExtractor {
   }
 
   /**
+   * Reset campaign decision (for testing/debugging)
+   */
+  static resetCampaignDecision() {
+    try {
+      localStorage.removeItem('autogreen_campaign_decision');
+      sessionStorage.removeItem('autogreen_cutlery_choice');
+      window.autoGreenCutleryChoice = null;
+      this.logger?.log('🔄 Campaign decision reset - extension will ask again next time!');
+      console.log('✅ AutoGreen: Campaign decision reset successfully!');
+      return true;
+    } catch (error) {
+      this.logger?.error('Error resetting campaign decision:', error);
+      return false;
+    }
+  }
+
+  /**
    * Get stored campaign decision (with expiry check)
    */
   static getCampaignDecision() {
@@ -1054,12 +1071,12 @@ class AutoGreenFoodPandaExtractor {
       // Store campaign decision to prevent re-asking
       this.storeCampaignDecision('joined');
       
-      // Generate UUID
-      const uuid = this.generateUUID();
+      // Get existing user ID from extension storage or generate new one
+      const userId = await this.getOrCreateUserId();
       
       // Store campaign data
       const campaignData = {
-        uuid: uuid,
+        uuid: userId,
         postalCode: postalCode,
         timestamp: Date.now(),
         action: 'no_cutlery',
@@ -1094,17 +1111,17 @@ class AutoGreenFoodPandaExtractor {
   static async submitCampaignData(campaignData) {
     try {
       // 🔧 CONFIGURE YOUR DATABASE API ENDPOINT HERE
-      const apiEndpoint = 'http://localhost:3000/api/users';
+      const apiEndpoint = 'https://autogreen-sg.vercel.app/api/users';
       // Alternative examples:
       // const apiEndpoint = 'https://your-backend.herokuapp.com/api/users';
-      // const apiEndpoint = 'https://autogreen.sg/api/users'; // for production
+      // const apiEndpoint = 'http://localhost:3000/api/users'; // for development
       
       this.logger?.log('📊 Submitting campaign data to database...', campaignData);
       
       // Transform campaign data to match your API structure
       const apiData = {
         userId: campaignData.uuid,           // Use UUID as userId
-        sectorCode: campaignData.postalCode, // Use postalCode as sectorCode
+        sectorCode: campaignData.postalCode.substring(0, 2), // Use first 2 digits of postal code as sector
         points: campaignData.points          // Points earned (1)
       };
       
@@ -1148,6 +1165,9 @@ class AutoGreenFoodPandaExtractor {
 
         const result = await response.json();
         this.logger?.log('🎯 Campaign data successfully saved to database!', result);
+        
+        // Notify popup to refresh stats (if popup is open)
+        this.notifyPopupStatsUpdate();
         
         // Return the result for any additional processing
         return { success: true, data: result };
@@ -1259,6 +1279,59 @@ class AutoGreenFoodPandaExtractor {
   // ================================================
 
   /**
+   * Notify popup to refresh stats when points are earned
+   */
+  static notifyPopupStatsUpdate() {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.runtime) {
+        // Send message to extension popup to refresh stats
+        chrome.runtime.sendMessage({
+          action: 'pointsEarned',
+          timestamp: Date.now()
+        }, (response) => {
+          // Response handling is optional
+          if (chrome.runtime.lastError) {
+            console.log('Popup not open or message failed:', chrome.runtime.lastError.message);
+          } else {
+            console.log('Successfully notified popup to refresh stats');
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Failed to notify popup:', error);
+    }
+  }
+
+  /**
+   * Get existing user ID from extension storage or create a new one
+   */
+  static async getOrCreateUserId() {
+    try {
+      if (typeof chrome !== 'undefined' && chrome.storage) {
+        return new Promise((resolve) => {
+          chrome.storage.sync.get(['userId'], (result) => {
+            if (result.userId) {
+              resolve(result.userId);
+            } else {
+              // Generate new user ID and save it
+              const newUserId = this.generateUUID();
+              chrome.storage.sync.set({ userId: newUserId }, () => {
+                resolve(newUserId);
+              });
+            }
+          });
+        });
+      } else {
+        // Fallback: generate UUID if chrome storage not available
+        return this.generateUUID();
+      }
+    } catch (error) {
+      console.error('Failed to get/create user ID:', error);
+      return this.generateUUID();
+    }
+  }
+
+  /**
    * Generate a random UUID
    */
   static generateUUID() {
@@ -1341,7 +1414,7 @@ if (typeof window !== "undefined") {
   // 🧪 Testing utility: Clear campaign decision
   window.clearAutoGreenCampaign = () => {
     if (window.AutoGreenFoodPandaExtractor) {
-      window.AutoGreenFoodPandaExtractor.clearCampaignDecision();
+      window.AutoGreenFoodPandaExtractor.resetCampaignDecision();
       console.log('✅ AutoGreen campaign decision cleared! Campaign will show again on next eco-friendly order.');
       console.log('💡 This decision normally persists for 24 hours across tabs and browser restarts.');
     } else {

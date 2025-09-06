@@ -18,6 +18,30 @@ document.addEventListener("DOMContentLoaded", async function () {
   await initializeApp();
 });
 
+// Listen for messages from content scripts (e.g., when points are earned)
+if (typeof chrome !== 'undefined' && chrome.runtime) {
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'pointsEarned') {
+      console.log('📊 Points earned notification received, refreshing stats...');
+      
+      // Refresh stats if app is initialized
+      if (window.app && window.app.state && window.app.state.fetchAndUpdateStats) {
+        window.app.state.fetchAndUpdateStats().then(() => {
+          console.log('✅ Stats refreshed after points earned');
+          sendResponse({ success: true });
+        }).catch((error) => {
+          console.error('❌ Failed to refresh stats:', error);
+          sendResponse({ success: false, error: error.message });
+        });
+      } else {
+        sendResponse({ success: false, error: 'App not initialized' });
+      }
+      
+      return true; // Keep message channel open for async response
+    }
+  });
+}
+
 
 // ================================================
 // 📊 STATE MANAGEMENT
@@ -34,6 +58,7 @@ class AutoGreenState {
     this.supportedSites = [
       'lazada', 'foodpanda'
     ];
+    this.userId = null; // Will store persistent user ID
   }
 
   /**
@@ -43,7 +68,7 @@ class AutoGreenState {
     if (this.isChromeExtension()) {
       try {
         const data = await new Promise((resolve, reject) => {
-          chrome.storage.sync.get(['extensionEnabled', 'userStats', 'deepScanEnabled'], (result) => {
+          chrome.storage.sync.get(['extensionEnabled', 'userStats', 'deepScanEnabled', 'userId'], (result) => {
             if (chrome.runtime.lastError) {
               reject(chrome.runtime.lastError);
             } else {
@@ -54,6 +79,16 @@ class AutoGreenState {
 
         this.extensionEnabled = data.extensionEnabled !== false;
         this.deepScanEnabled = data.deepScanEnabled || false;
+        
+        // Get or create persistent user ID
+        if (data.userId) {
+          this.userId = data.userId;
+        } else {
+          this.userId = this.generateUUID();
+          // Save the new user ID immediately
+          chrome.storage.sync.set({ userId: this.userId });
+        }
+        
         if (data.userStats) {
           this.userStats = { ...this.userStats, ...data.userStats };
         }
@@ -76,7 +111,8 @@ class AutoGreenState {
         chrome.storage.sync.set({ 
           extensionEnabled: this.extensionEnabled,
           deepScanEnabled: this.deepScanEnabled,
-          userStats: this.userStats 
+          userStats: this.userStats,
+          userId: this.userId
         });
       } catch (error) {
         console.error('Failed to save to storage:', error);
@@ -102,6 +138,17 @@ class AutoGreenState {
   }
 
   /**
+   * Generate a random UUID for user identification
+   */
+  generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  /**
    * Update the stats display in the UI
    */
   updateStatsDisplay() {
@@ -110,6 +157,57 @@ class AutoGreenState {
 
     if (pointsEl) pointsEl.textContent = this.userStats.points;
     if (itemsEl) itemsEl.textContent = this.userStats.itemsSaved;
+  }
+
+  /**
+   * Fetch user stats from backend API and update display
+   */
+  async fetchAndUpdateStats() {
+    if (!this.userId) {
+      console.log('No user ID available, cannot fetch stats');
+      return;
+    }
+
+    try {
+      const apiUrl = `https://autogreen-sg.vercel.app/api/users/${this.userId}/stats`;
+      console.log('Fetching user stats from API:', apiUrl);
+
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Received user stats from API:', data);
+
+        // Update user stats with backend data (check if response has success wrapper)
+        if (data.success && data.stats) {
+          this.userStats.points = data.stats.greenPoints || 0;
+          this.userStats.itemsSaved = data.stats.recordCount || 0;
+        } else {
+          // Direct stats object
+          this.userStats.points = data.greenPoints || data.totalPoints || 0;
+          this.userStats.itemsSaved = data.recordCount || data.totalActions || 0;
+        }
+
+        // Update the UI immediately
+        this.updateStatsDisplay();
+        
+        // Save updated stats to local storage
+        this.saveToStorage();
+
+        return data;
+      } else if (response.status === 404) {
+        console.log('User not found in database, keeping local stats');
+      } else {
+        console.log('API error:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user stats from API:', error);
+    }
   }
 }
 
@@ -130,6 +228,10 @@ class AutoGreenUI {
     this.updateToggleButton();
     this.setupEventListeners();
     await this.loadStats();
+    
+    // Fetch real stats from backend database
+    await this.state.fetchAndUpdateStats();
+    
     await this.loadSettings();
   }
 
@@ -518,6 +620,10 @@ class AutoGreenUI {
    */
   async refreshStats() {
     await this.loadStats();
+    
+    // Fetch updated stats from backend database
+    await this.state.fetchAndUpdateStats();
+    
     this.showStatus("Stats refreshed", "success");
   }
 
@@ -607,6 +713,7 @@ let app;
 async function initializeApp() {
   try {
     app = new AutoGreenApp();
+    window.app = app; // Make app globally accessible for message handlers
     await app.initialize();
   } catch (error) {
     console.error('Failed to start AutoGreen popup:', error);
