@@ -49,7 +49,8 @@ class UIManager {
         this.indicators.set("counter", counter);
       }
 
-      counter.textContent = `🛍️ Products Found: ${count}`;
+      // Counter hidden - no product count messages
+      counter.style.display = 'none';
     } catch (error) {
       this.logger.error("Failed to update counter:", error);
     }
@@ -68,7 +69,8 @@ class UIManager {
         this.indicators.set("eco-counter", counter);
       }
 
-      counter.textContent = `EcoFriendly Products Found: ${count}`;
+      // Eco counter hidden - no eco product count messages
+      counter.style.display = 'none';
     } catch (error) {
       this.logger.error("Failed to update eco counter:", error);
     }

@@ -12,6 +12,27 @@
  * Initialize the AutoGreen extension when the page is ready
  */
 function initializeAutoGreen() {
+  // First check if extension is enabled
+  chrome.storage.sync.get(['extensionEnabled'], (result) => {
+    const isEnabled = result.extensionEnabled !== false; // Default to enabled if not set
+    
+    if (!isEnabled) {
+      window.AutoGreenLogger?.log("🚫 AutoGreen Extension is disabled, skipping initialization");
+      // Store the disabled state globally
+      window.autoGreenDisabled = true;
+      return;
+    }
+    
+    // Extension is enabled, proceed with normal initialization
+    window.autoGreenDisabled = false;
+    continueInitialization();
+  });
+}
+
+/**
+ * Continue with normal initialization after checking enabled status
+ */
+function continueInitialization() {
   // Wait for all dependencies to be loaded
   if (
     !window.AutoGreenConfig ||
@@ -32,7 +53,7 @@ function initializeAutoGreen() {
       deepScanner: !!window.AutoGreenDeepScanner,
       ecoDetector: !!window.AutoGreenEcoProductDetector
     });
-    setTimeout(initializeAutoGreen, 100);
+    setTimeout(continueInitialization, 100);
     return;
   }
 
@@ -473,12 +494,50 @@ function setupMessageListener() {
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     try {
       switch (request.action) {
+        case "extensionToggled":
+          // Handle extension enable/disable
+          const isEnabled = request.enabled;
+          if (isEnabled) {
+            // Re-enable extension
+            window.autoGreenDisabled = false;
+            // Reinitialize if not already done
+            if (!window.autoGreenDetector && !window.autoGreenEcoDetector) {
+              setTimeout(() => {
+                continueInitialization();
+              }, 100);
+            }
+            sendResponse({ success: true, message: "Extension enabled" });
+          } else {
+            // Disable extension
+            window.autoGreenDisabled = true;
+            // Clean up existing functionality
+            if (window.autoGreenDetector && typeof window.autoGreenDetector.cleanup === 'function') {
+              window.autoGreenDetector.cleanup();
+            }
+            if (window.autoGreenEcoDetector && typeof window.autoGreenEcoDetector.destroy === 'function') {
+              window.autoGreenEcoDetector.destroy();
+            }
+            // Clear any UI indicators
+            const indicators = document.querySelectorAll('[id^="autogreen-"]');
+            indicators.forEach(el => el.remove());
+            sendResponse({ success: true, message: "Extension disabled" });
+          }
+          break;
+
         case "getBasicStats":
+          if (window.autoGreenDisabled) {
+            sendResponse({ disabled: true });
+            break;
+          }
           const basicStats = window.autoGreenDetector?.getStats() || {};
           sendResponse(basicStats);
           break;
 
         case "getDeepScanStats":
+          if (window.autoGreenDisabled) {
+            sendResponse({ disabled: true });
+            break;
+          }
           try {
             const deepStats = window.autoGreenDetector?.getDeepScanStats() || {};
             sendResponse(deepStats);
@@ -498,6 +557,10 @@ function setupMessageListener() {
           break;
 
         case "getDeepScanStatus":
+          if (window.autoGreenDisabled) {
+            sendResponse({ enabled: false, disabled: true });
+            break;
+          }
           window.autoGreenDetector?.getDeepScanStatus().then((enabled) => {
             sendResponse({ enabled });
           }).catch((error) => {

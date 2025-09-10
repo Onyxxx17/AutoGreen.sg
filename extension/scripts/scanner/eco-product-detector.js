@@ -222,6 +222,11 @@ class AutoGreenEcoProductDetector {
    */
   scanForEcoProducts() {
     try {
+      // Check if extension is disabled
+      if (window.autoGreenDisabled) {
+        return;
+      }
+      
       const currentUrl = window.location.href;
       
       // Only scan on supported e-commerce sites
@@ -648,15 +653,9 @@ class AutoGreenEcoProductDetector {
    * Show detailed eco-friendly information
    */
   showEcoDetails(ecoInfo) {
-    const message = `🌱 Eco-Friendly Product Found!\n\nMatched keywords: ${ecoInfo.matchedKeywords.join(', ')}\nConfidence: ${Math.round(ecoInfo.confidence * 100)}%`;
-    
-    // Use the existing UI manager if available
-    if (window.AutoGreenUIManager) {
-      const ui = new window.AutoGreenUIManager();
-      ui.showIndicator(message, 'success', 5000);
-    } else {
-      this.logger.log(message);
-    }
+    // Eco-friendly product detection messages removed
+    // Just log for debugging purposes
+    this.logger.log(`🌱 Eco-Friendly Product Found! Keywords: ${ecoInfo.matchedKeywords.join(', ')}, Confidence: ${Math.round(ecoInfo.confidence * 100)}%`);
   }
 
   /**

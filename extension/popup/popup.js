@@ -374,10 +374,13 @@ class AutoGreenUI {
           if (basicResult) {
             const basicStats = document.getElementById('basic-stats');
             if (basicStats) {
-              basicStats.innerHTML = `
-                <div>Products Found: ${basicResult.totalProcessed || 0}</div>
-                <div>Currently Processing: ${basicResult.currentlyProcessing ? "Yes" : "No"}</div>
-              `;
+              if (basicResult.disabled) {
+                basicStats.innerHTML = `<div style="color: #999;">Extension Disabled</div>`;
+              } else {
+                basicStats.innerHTML = `
+                  <div>Currently Processing: ${basicResult.currentlyProcessing ? "Yes" : "No"}</div>
+                `;
+              }
             }
           }
 
@@ -389,11 +392,15 @@ class AutoGreenUI {
           if (deepResult) {
             const deepStats = document.getElementById('deep-scan-stats');
             if (deepStats) {
-              deepStats.innerHTML = `
-                <div>Queue Length: ${deepResult.queueLength || 0}</div>
-                <div>Active Scanners: ${deepResult.activeScanners || 0}/${deepResult.maxConcurrent || 3}</div>
-                <div>Scanned Products: ${deepResult.scannedCount || 0}</div>
-              `;
+              if (deepResult.disabled) {
+                deepStats.innerHTML = `<div style="color: #999;">Extension Disabled</div>`;
+              } else {
+                deepStats.innerHTML = `
+                  <div>Queue Length: ${deepResult.queueLength || 0}</div>
+                  <div>Active Scanners: ${deepResult.activeScanners || 0}/${deepResult.maxConcurrent || 3}</div>
+                  <div>Scanned Products: ${deepResult.scannedCount || 0}</div>
+                `;
+              }
             }
           }
         }
@@ -405,7 +412,6 @@ class AutoGreenUI {
       
       if (basicStats && basicStats.textContent === 'Loading...') {
         basicStats.innerHTML = `
-          <div>Products Found: 0</div>
           <div>Currently Processing: No</div>
         `;
       }
@@ -486,10 +492,34 @@ class AutoGreenUI {
   /**
    * Toggle main extension
    */
-  toggleExtension() {
+  async toggleExtension() {
     this.state.extensionEnabled = !this.state.extensionEnabled;
     this.state.saveToStorage();
     this.updateToggleButton();
+    
+    // Notify all content scripts about the extension toggle
+    try {
+      const tabs = await chrome.tabs.query({
+        url: ["https://lazada.sg/*", "https://www.lazada.sg/*", "https://lazada.com.sg/*", 
+              "https://www.lazada.com.sg/*", "https://checkout.lazada.sg/*",
+              "https://foodpanda.sg/*", "https://www.foodpanda.sg/*", 
+              "https://foodpanda.com.sg/*", "https://www.foodpanda.com.sg/*"]
+      });
+      
+      for (const tab of tabs) {
+        try {
+          await chrome.tabs.sendMessage(tab.id, {
+            action: "extensionToggled",
+            enabled: this.state.extensionEnabled
+          });
+        } catch (error) {
+          // Tab might not have content script injected, ignore
+          console.log(`Could not notify tab ${tab.id}:`, error.message);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to notify tabs about extension toggle:', error);
+    }
     
     this.showStatus(
       this.state.extensionEnabled ? 'Extension enabled!' : 'Extension disabled',

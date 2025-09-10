@@ -525,6 +525,12 @@ class AutoGreenFoodPandaExtractor {
    */
   static handlePlaceOrderClick(event) {
     try {
+      // Check if extension is disabled
+      if (window.autoGreenDisabled) {
+        this.logger?.log('🚫 Extension disabled, allowing order to proceed normally');
+        return;
+      }
+      
       // Check if we're already processing an order to prevent loops
       if (this.isProcessingOrder) {
         this.logger?.log('⏭️ Order already being processed, skipping...');

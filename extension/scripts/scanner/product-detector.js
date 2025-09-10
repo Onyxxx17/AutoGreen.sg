@@ -103,6 +103,10 @@ class AutoGreenProductDetector {
    * Handle when scrolling stops
    */
   handleScrollStop() {
+    // Check if extension is disabled
+    if (window.autoGreenDisabled) {
+      return;
+    }
     this.logger.debug('Scroll stopped, processing visible products...');
     this.processVisibleProducts();
   }
@@ -111,6 +115,10 @@ class AutoGreenProductDetector {
    * Handle DOM changes (for infinite scroll)
    */
   handleDOMChange() {
+    // Check if extension is disabled
+    if (window.autoGreenDisabled) {
+      return;
+    }
     this.logger.debug('Page content changed');
     setTimeout(() => this.processVisibleProducts(), this.config.PERFORMANCE.MUTATION_DELAY);
   }
@@ -181,18 +189,20 @@ class AutoGreenProductDetector {
       this.deepScanner.queueProductsForDeepScan(products);
     }
 
-    // Update UI
+    // Update UI counter only
     this.ui.showCounter(this.totalFound);
-    this.ui.showIndicator(
-      `📦 Processed ${products.length} new products (Total: ${this.totalFound})`,
-      'success'
-    );
+    // Removed product count indicator message
   }
 
   /**
    * Process all visible products in batches
    */
   async processVisibleProducts() {
+    // Check if extension is disabled
+    if (window.autoGreenDisabled) {
+      return;
+    }
+    
     if (this.isProcessing) {
       this.logger.debug('Already processing, skipping...');
       return;
