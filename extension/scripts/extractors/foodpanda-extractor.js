@@ -784,7 +784,7 @@ class AutoGreenFoodPandaExtractor {
             <p style="color: #888; margin: 0 0 20px 0; font-size: 12px;">
               Your order will continue after this quick step.
             </p>
-            <div style="margin: 20px 0;">
+            <div style="margin: 20px 0; display: flex; flex-direction: column; gap: 20px; max-width: 300px;">
               <button id="autogreen-join-campaign" style="
                 background: #4CAF50;
                 color: white;
@@ -794,7 +794,7 @@ class AutoGreenFoodPandaExtractor {
                 font-size: 16px;
                 font-weight: bold;
                 cursor: pointer;
-                margin: 0 10px;
+                width: 100%;
                 transition: background 0.3s;
               ">Yes, Join Campaign!</button>
               <button id="autogreen-skip-campaign" style="
@@ -805,7 +805,7 @@ class AutoGreenFoodPandaExtractor {
                 border-radius: 8px;
                 font-size: 16px;
                 cursor: pointer;
-                margin: 0 10px;
+                width: 100%;
                 transition: background 0.3s;
               ">Maybe Later</button>
             </div>
